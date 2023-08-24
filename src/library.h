@@ -1,0 +1,6 @@
+#ifndef LIBNAMUMARK_LIBRARY_H
+#define LIBNAMUMARK_LIBRARY_H
+
+void hello(void);
+
+#endif //LIBNAMUMARK_LIBRARY_H
