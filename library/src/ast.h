@@ -8,6 +8,10 @@ extern "C" {
 #endif
 #define LIBNAMUMARK_AST_H
 #include <stdlib.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include "stack.h"
 // AST node types
 #define AST_NODE_TYPE_ROOT 0
 #define AST_NODE_TYPE_TEXT 1
@@ -36,12 +40,15 @@ typedef struct ast_node {
     void *data;
     // data size
     size_t data_size;
+    // index in text
+    size_t index;
 } ast_node;
 // AST node functions
-ast_node *ast_node_new(int type, void *data, int data_size);
+ast_node *ast_node_new(int type, void *data, size_t data_size, size_t index);
 void ast_node_add_child(ast_node *parent, ast_node *child);
 void ast_node_free(ast_node *node);
 void ast_node_remove_child(ast_node *parent, size_t index);
+void ast_node_print(ast_node *node);
 #ifdef __cplusplus
 }
 #endif
