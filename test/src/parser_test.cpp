@@ -93,3 +93,17 @@ TEST(ParserComplexTextTest, BasicAssertions){
     EXPECT_STREQ(data, "After\n");
     ast_node_print(node);
 }
+
+TEST(ParserEscapeTest, BasicAssertions) {
+    char text[] = "\\= H1 =\\d";
+    printf("text: %s\n", text);
+    ast_node *node = parse(text, strlen(text));
+    printf("node: %p\n", node);
+    EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
+    EXPECT_EQ(node->children_size, 1);
+    EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_TEXT);
+    EXPECT_EQ(node->children[0]->children_size, 0);
+    char* data = (char*)node->children[0]->data;
+    EXPECT_STREQ(data, "= H1 =d");
+    ast_node_print(node);
+}

@@ -15,6 +15,7 @@ struct syntax {
     bool is_line;
 };
 
+
 // define syntaxes
 struct syntax syntaxes[] = {
         {"[* ", "]", AST_NODE_TYPE_FOOTNOTE},
@@ -31,6 +32,9 @@ struct syntax syntaxes[] = {
         {"~~","~~", AST_NODE_TYPE_STRIKE},
         {"> ","", AST_NODE_TYPE_BLOCKQUOTE, true},
         {"##","\n", AST_NODE_TYPE_COMMENT},
+        {"[", "]", AST_NODE_TYPE_FUNCTION},
+        {" * ", "", AST_NODE_TYPE_LIST},
+        {"--","--", AST_NODE_TYPE_STRIKE},
 };
 
 // get syntax by type
@@ -42,6 +46,26 @@ struct syntax get_syntax_by_type(int type){
     }
     abort();
 }
+
+// we just use this once(might?)
+size_t get_ast_node_in_stack_match_type(stack * stack1, int type){
+    ast_node ** data = (ast_node **) stack1->data;
+    size_t data_size = stack1->size;
+    if(data_size == 0){
+        return data_size;
+    }
+    for(size_t i = data_size - 1; ; i--){
+        if(data[i]->type == type){
+            return i;
+        }
+        if(i == 0){
+            break;
+        }
+    }
+    return data_size;
+}
+
+
 bool type_exists_in_stack(stack * stack1, int type){
     ast_node ** data = (ast_node **) stack1->data;
     size_t data_size = stack1->size;
@@ -89,6 +113,18 @@ ast_node* parse(char* text, size_t text_size){
     for (size_t i = 0; i < text_size; i++){
         // parse syntax
         bool is_break = false;
+        if(text[i] == '\\' && text_size > i + 1){
+            str_buf[str_buf_size] = text[i + 1];
+            char * tmp = realloc(str_buf, sizeof (char *) * (str_buf_size + 2));
+            if(tmp == NULL){
+                abort();
+            }
+            str_buf = tmp;
+            str_buf_size ++;
+            str_buf[str_buf_size] = '\0';
+            i++;
+            continue;
+        }
         for(size_t j = 0; j < sizeof(syntaxes) / sizeof(struct syntax); j++){
             struct syntax current_syntax = syntaxes[j];
             if(current_node->type == current_syntax.type && starts_with(text + i, text_size - i, current_syntax.end)){
@@ -112,14 +148,8 @@ ast_node* parse(char* text, size_t text_size){
             else if(strlen(current_syntax.end) != 0 && starts_with(text + i, text_size - i, current_syntax.end)
                 && type_exists_in_stack(node_stack, current_syntax.type)){
                 // get index of opening syntax
-                for(size_t k = node_stack->size - 1; ; k--){
-                    if(((ast_node *)node_stack->data[k])->type == current_syntax.type){
+                ast_node *node = node_stack->data[get_ast_node_in_stack_match_type(node_stack, current_syntax.type) + 1];
 
-                    }
-                    if(k == 0){
-                        break;
-                    }
-                }
             }
             if(starts_with(text + i, text_size - i, current_syntax.start) && (!current_syntax.is_line || i == 0 || text[i - 1] == '\n')){
                 if(str_buf_size > 0){

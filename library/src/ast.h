@@ -29,6 +29,8 @@ extern "C" {
 #define AST_NODE_TYPE_FOOTNOTE 13
 #define AST_NODE_TYPE_LINK 14
 #define AST_NODE_TYPE_COMMENT 15
+#define AST_NODE_TYPE_FUNCTION 16
+#define AST_NODE_TYPE_LIST 17
 // AST node structure
 typedef struct ast_node {
     int type;
