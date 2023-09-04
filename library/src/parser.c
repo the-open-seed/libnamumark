@@ -38,10 +38,10 @@ struct syntax syntax_defines[] = {
 };
 
 // get syntax by type
-struct syntax get_syntax_by_type(int type) {
+struct syntax* get_syntax_by_type(int type) {
     for (size_t i = 0; i < sizeof(syntax_defines) / sizeof(struct syntax); i++) {
         if (syntax_defines[i].type == type) {
-            return syntax_defines[i];
+            return &syntax_defines[i];
         }
     }
     abort();
@@ -100,7 +100,6 @@ bool starts_with(const char *text, size_t text_size, char *prefix) {
 }
 
 #include <stdio.h>
-
 // parser
 ast_node *parse(char *text, size_t text_size) {
     // create root node
@@ -250,6 +249,26 @@ ast_node *parse(char *text, size_t text_size) {
         str_buf = tmp;
         str_buf_size++;
         str_buf[str_buf_size] = '\0';
+        if(current_node->type>=AST_NODE_TYPE_H1 && current_node->type<=AST_NODE_TYPE_H6 && text[i]=='\n'){
+            printf("current_node: %d\n", current_node->type);
+            // get syntax
+            struct syntax * current_syntax = get_syntax_by_type(current_node->type);
+            // resize buf
+            char *buf = realloc(str_buf, sizeof(char) * (str_buf_size + strlen(current_syntax->start)) + 1);
+            if (buf == NULL) {
+                abort();
+            }
+            str_buf = buf;
+            // move buf content
+            memmove(str_buf + strlen(current_syntax->start), str_buf, str_buf_size);
+            // copy start syntax to buf
+            memcpy(str_buf, current_syntax->start, strlen(current_syntax->start));
+            str_buf_size += strlen(current_syntax->start);
+            // remove current node from node_stack
+            ast_node_remove_child(node_stack->data[node_stack->size-1], ((ast_node *)node_stack->data[node_stack->size-1])->children_size - 1);
+            // change current node
+            current_node = stack_pop(node_stack);
+        }
     }
     if (str_buf_size > 0) {
         // check previous node type is text

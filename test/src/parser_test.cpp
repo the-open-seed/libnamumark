@@ -118,6 +118,15 @@ TEST(ParserWrongSyntaxTest, BasicAssertions){
     EXPECT_STREQ(data, "a\n= H1 \n wrong!");
     ast_node_print(node);
 }
-// a
-// = H1
-//  wrong!
+
+TEST(ParserWrongHeaderSyntaxTest, BasicAssertions){
+    char text[] = "= H1 \n =\nwrong!";
+    printf("text: %s\n", text);
+    ast_node *node = parse(text, strlen(text));
+    EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
+    EXPECT_EQ(node->children_size, 1);
+    EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_TEXT);
+    char* data = (char*)node->children[0]->data;
+    EXPECT_STREQ(data, "= H1 \n =\nwrong!");
+    ast_node_print(node);
+}
