@@ -4,7 +4,6 @@ TEST(ParserHeadlineTest, BasicAssertions) {
     char text[] = "= Hello, world!H1 =\n== Hello, world!H2 ==\n";
     printf("text: %s\n", text);
     ast_node *node = parse(text, strlen(text));
-    printf("node: %p\n", node);
     EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
     EXPECT_EQ(node->children_size, 2);
     EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_H1);
@@ -28,7 +27,6 @@ TEST(ParserTextTest, BasicAssertions){
     char text[] = "Hello, world!\n'''Hello, world!'''Hello?\nBefore''AA''After\n";
     printf("text: %s\n", text);
     ast_node *node = parse(text, strlen(text));
-    printf("node: %p\n", node);
     EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
     EXPECT_EQ(node->children_size, 5);
     EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_TEXT);
@@ -56,7 +54,6 @@ TEST(ParserComplexTextTest, BasicAssertions){
     char text[] = "= H1 =\nHello, world!\n =='''Hello, world!'''Hello?\n== H2 ==\nBefore''AA''After\n";
     printf("text: %s\n", text);
     ast_node *node = parse(text, strlen(text));
-    printf("node: %p\n", node);
     EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
     EXPECT_EQ(node->children_size, 8);
     EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_H1);
@@ -112,7 +109,6 @@ TEST(ParserWrongSyntaxTest, BasicAssertions){
     char text[] = "'''a\n= H1 \n wrong!'''";
     printf("text: %s\n", text);
     ast_node *node = parse(text, strlen(text));
-    printf("node: %p\n", node);
     EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
     EXPECT_EQ(node->children_size, 1);
     EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_BOLD);
