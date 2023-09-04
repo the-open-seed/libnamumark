@@ -107,3 +107,21 @@ TEST(ParserEscapeTest, BasicAssertions) {
     EXPECT_STREQ(data, "= H1 =d");
     ast_node_print(node);
 }
+
+TEST(ParserWrongSyntaxTest, BasicAssertions){
+    char text[] = "'''a\n= H1 \n wrong!'''";
+    printf("text: %s\n", text);
+    ast_node *node = parse(text, strlen(text));
+    printf("node: %p\n", node);
+    EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
+    EXPECT_EQ(node->children_size, 1);
+    EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_BOLD);
+    EXPECT_EQ(node->children[0]->children_size, 1);
+    EXPECT_EQ(node->children[0]->children[0]->type, AST_NODE_TYPE_TEXT);
+    char* data = (char*)node->children[0]->children[0]->data;
+    EXPECT_STREQ(data, "a\n= H1 \n wrong!");
+    ast_node_print(node);
+}
+// a
+// = H1
+//  wrong!

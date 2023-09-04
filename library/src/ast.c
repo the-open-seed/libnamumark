@@ -53,6 +53,9 @@ void ast_node_free(ast_node *node) {
 }
 
 void ast_node_remove_child(ast_node *parent, size_t index) {
+    if(parent->children_size<=index){
+        return;
+    }
     // remove child
     ast_node *child = parent->children[index];
     for (size_t i = index; i < parent->children_size - 1; i++) {
