@@ -4,8 +4,6 @@
 
 #include "ast.h"
 
-#include <stdlib.h>
-#include "stack.h"
 // AST node functions
 ast_node *ast_node_new(int type, void *data, size_t data_size, size_t index) {
     ast_node *node = malloc(sizeof(ast_node));
@@ -65,7 +63,7 @@ void ast_node_remove_child(ast_node *parent, size_t index) {
     // free child
     ast_node_free(child);
 }
-
+#ifdef DEBUG
 void ast_node_print(ast_node *node){
     char** types = (char*[]){"AST_NODE_TYPE_ROOT", "AST_NODE_TYPE_TEXT", "AST_NODE_TYPE_BOLD", "AST_NODE_TYPE_ITALIC", "AST_NODE_TYPE_UNDERLINE", "AST_NODE_TYPE_STRIKE", "AST_NODE_TYPE_H1", "AST_NODE_TYPE_H2", "AST_NODE_TYPE_H3", "AST_NODE_TYPE_H4", "AST_NODE_TYPE_H5", "AST_NODE_TYPE_H6", "AST_NODE_TYPE_BLOCKQUOTE", "AST_NODE_TYPE_FOOTNOTE", "AST_NODE_TYPE_LINK", "AST_NODE_TYPE_COMMENT", "AST_NODE_TYPE_FUNCTION", "AST_NODE_TYPE_LIST"};
     stack *n_stack = stack_new();
@@ -108,3 +106,4 @@ void ast_node_print(ast_node *node){
         }
     }
 }
+#endif

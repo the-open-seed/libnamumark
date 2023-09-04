@@ -10,7 +10,9 @@ extern "C" {
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stddef.h>
+#ifdef DEBUG
 #include <stdio.h>
+#endif
 #include "stack.h"
 // AST node types
 #define AST_NODE_TYPE_ROOT 0
@@ -50,7 +52,9 @@ ast_node *ast_node_new(int type, void *data, size_t data_size, size_t index);
 void ast_node_add_child(ast_node *parent, ast_node *child);
 void ast_node_free(ast_node *node);
 void ast_node_remove_child(ast_node *parent, size_t index);
+#ifdef DEBUG
 void ast_node_print(ast_node *node);
+#endif
 #ifdef __cplusplus
 }
 #endif
