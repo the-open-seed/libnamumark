@@ -18,7 +18,9 @@ TEST(ParserHeadlineTest, BasicAssertions) {
     // check data
     data = (char*)node->children[1]->children[0]->data;
     EXPECT_STREQ(data, "Hello, world!H2");
+#ifdef DEBUG
     ast_node_print(node);
+#endif
     // free node
     ast_node_free(node);
 }
@@ -48,7 +50,9 @@ TEST(ParserTextTest, BasicAssertions){
     EXPECT_EQ(node->children[4]->type, AST_NODE_TYPE_TEXT);
     data = (char*)node->children[4]->data;
     EXPECT_STREQ(data, "After\n");
+#ifdef DEBUG
     ast_node_print(node);
+#endif
 }
 TEST(ParserComplexTextTest, BasicAssertions){
     char text[] = "= H1 =\nHello, world!\n =='''Hello, world!'''Hello?\n== H2 ==\nBefore''AA''After\n";
@@ -88,7 +92,9 @@ TEST(ParserComplexTextTest, BasicAssertions){
     EXPECT_EQ(node->children[7]->type, AST_NODE_TYPE_TEXT);
     data = (char*)node->children[7]->data;
     EXPECT_STREQ(data, "After\n");
+#ifdef DEBUG
     ast_node_print(node);
+#endif
 }
 
 TEST(ParserEscapeTest, BasicAssertions) {
@@ -102,7 +108,9 @@ TEST(ParserEscapeTest, BasicAssertions) {
     EXPECT_EQ(node->children[0]->children_size, 0);
     char* data = (char*)node->children[0]->data;
     EXPECT_STREQ(data, "= H1 =d");
+#ifdef DEBUG
     ast_node_print(node);
+#endif
 }
 
 TEST(ParserWrongSyntaxTest, BasicAssertions){
@@ -116,7 +124,9 @@ TEST(ParserWrongSyntaxTest, BasicAssertions){
     EXPECT_EQ(node->children[0]->children[0]->type, AST_NODE_TYPE_TEXT);
     char* data = (char*)node->children[0]->children[0]->data;
     EXPECT_STREQ(data, "a\n= H1 \n wrong!");
+#ifdef DEBUG
     ast_node_print(node);
+#endif
 }
 
 TEST(ParserWrongHeaderSyntaxTest, BasicAssertions){
@@ -128,5 +138,7 @@ TEST(ParserWrongHeaderSyntaxTest, BasicAssertions){
     EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_TEXT);
     char* data = (char*)node->children[0]->data;
     EXPECT_STREQ(data, "= H1 \n =\nwrong!");
+#ifdef DEBUG
     ast_node_print(node);
+#endif
 }
