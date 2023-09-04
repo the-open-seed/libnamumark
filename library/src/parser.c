@@ -99,8 +99,6 @@ bool starts_with(const char *text, size_t text_size, char *prefix) {
     return true;
 }
 
-#include <stdio.h>
-
 // parser
 ast_node *parse(char *text, size_t text_size) {
     // create root node
@@ -257,7 +255,6 @@ ast_node *parse(char *text, size_t text_size) {
         str_buf_size++;
         str_buf[str_buf_size] = '\0';
         if (current_node->type >= AST_NODE_TYPE_H1 && current_node->type <= AST_NODE_TYPE_H6 && text[i] == '\n') {
-            printf("current_node: %d\n", current_node->type);
             // get syntax
             struct syntax *current_syntax = get_syntax_by_type(current_node->type);
             // resize buf
