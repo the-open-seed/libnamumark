@@ -219,6 +219,25 @@ ast_node *parse(char *text, size_t text_size) {
             // find syntax start
             if (starts_with(text + i, text_size - i, current_syntax.start) &&
                 (!current_syntax.is_line || i == 0 || text[i - 1] == '\n')) {
+                // check previous node type is quote
+                if(str_buf_size == 0 && current_node->children_size > 0 && current_node->children[current_node->children_size - 1]->type == AST_NODE_TYPE_BLOCKQUOTE){
+                    stack_push(node_stack, current_node);
+                    // combine quote
+                    current_node = current_node->children[current_node->children_size - 1];
+                    // add \n to str_buf
+                    str_buf[str_buf_size] = '\n';
+                    char *tmp = realloc(str_buf, sizeof(char *) * (str_buf_size + 2));
+                    if (tmp == NULL) {
+                        abort();
+                    }
+                    str_buf = tmp;
+                    str_buf_size++;
+                    str_buf[str_buf_size] = '\0';
+                    // skip syntax
+                    i += strlen(current_syntax.start) - 1;
+                    is_break = true;
+                    break;
+                }
                 if (str_buf_size > 0) {
                     // check previous node type is text
                     if (current_node->children_size > 0 &&

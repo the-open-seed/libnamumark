@@ -144,29 +144,27 @@ TEST(ParserWrongHeaderSyntaxTest, BasicAssertions){
 #endif
 }
 
-TEST(ParserQuoteTest, BasicAssertions){
+TEST(ParserDoubleQuoteTest, BasicAssertions){
     char text[] = "Hello, world!1\n> > Hello, world!2\n> Hello, world!3\nHello, world!4";
     printf("text: %s\n", text);
     ast_node *node = parse(text, strlen(text));
     EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
-    EXPECT_EQ(node->children_size, 4);
+    EXPECT_EQ(node->children_size, 3);
     EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_TEXT);
     char* data = (char*)node->children[0]->data;
     EXPECT_STREQ(data, "Hello, world!1\n");
     EXPECT_EQ(node->children[1]->type, AST_NODE_TYPE_BLOCKQUOTE);
-    EXPECT_EQ(node->children[1]->children_size, 1);
+    EXPECT_EQ(node->children[1]->children_size, 2);
     EXPECT_EQ(node->children[1]->children[0]->type, AST_NODE_TYPE_BLOCKQUOTE);
     EXPECT_EQ(node->children[1]->children[0]->children_size, 1);
     EXPECT_EQ(node->children[1]->children[0]->children[0]->type, AST_NODE_TYPE_TEXT);
     data = (char*)node->children[1]->children[0]->children[0]->data;
     EXPECT_STREQ(data, "Hello, world!2");
-    EXPECT_EQ(node->children[2]->type, AST_NODE_TYPE_BLOCKQUOTE);
-    EXPECT_EQ(node->children[2]->children_size, 1);
-    EXPECT_EQ(node->children[2]->children[0]->type, AST_NODE_TYPE_TEXT);
-    data = (char*)node->children[2]->children[0]->data;
-    EXPECT_STREQ(data, "Hello, world!3");
-    EXPECT_EQ(node->children[3]->type, AST_NODE_TYPE_TEXT);
-    data = (char*)node->children[3]->data;
+    EXPECT_EQ(node->children[1]->children[1]->type, AST_NODE_TYPE_TEXT);
+    data = (char*)node->children[1]->children[1]->data;
+    EXPECT_STREQ(data, "\nHello, world!3");
+    EXPECT_EQ(node->children[2]->type, AST_NODE_TYPE_TEXT);
+    data = (char*)node->children[2]->data;
     EXPECT_STREQ(data, "Hello, world!4");
 #ifdef DEBUG
     ast_node_print(node);
