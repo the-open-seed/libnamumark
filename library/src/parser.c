@@ -165,8 +165,11 @@ ast_node *parse(char *text, size_t text_size) {
                 current_node = stack_pop(node_stack);
                 // process end of AST_NODE_TYPE_BLOCKQUOTE in AST_NODE_TYPE_BLOCKQUOTE
                 // previous node is AST_NODE_TYPE_BLOCKQUOTE and current node is AST_NODE_TYPE_BLOCKQUOTE
-                if(current_node->type==AST_NODE_TYPE_BLOCKQUOTE && current_syntax.type==AST_NODE_TYPE_BLOCKQUOTE){
-                    current_node = stack_pop(node_stack);
+                if(current_syntax.type==AST_NODE_TYPE_BLOCKQUOTE){
+                    // fix bug when AST_NODE_TYPE_BLOCKQUOTE appears more than two times
+                    while (current_node->type==AST_NODE_TYPE_BLOCKQUOTE) {
+                        current_node = stack_pop(node_stack);
+                    }
                 }
                 // skip syntax
                 i += strlen(current_syntax.end) - 1;
