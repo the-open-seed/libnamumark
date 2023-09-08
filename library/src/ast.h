@@ -10,9 +10,7 @@ extern "C" {
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stddef.h>
-#ifdef DEBUG
 #include <stdio.h>
-#endif
 #include "stack.h"
 // AST node types
 #define AST_NODE_TYPE_ROOT 0

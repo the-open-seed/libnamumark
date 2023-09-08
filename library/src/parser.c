@@ -30,7 +30,7 @@ struct syntax syntax_defines[] = {
         {"''",      "''",        AST_NODE_TYPE_ITALIC},
         {"__",      "__",        AST_NODE_TYPE_UNDERLINE},
         {"~~",      "~~",        AST_NODE_TYPE_STRIKE},
-        {"> ",      "",          AST_NODE_TYPE_BLOCKQUOTE, true},
+        {"> ",      "\n",          AST_NODE_TYPE_BLOCKQUOTE, true},
         {"##",      "\n",        AST_NODE_TYPE_COMMENT},
         {"[",       "]",         AST_NODE_TYPE_FUNCTION},
         {" * ",     "",          AST_NODE_TYPE_LIST},
@@ -163,6 +163,11 @@ ast_node *parse(char *text, size_t text_size) {
                 }
                 // pop current node from node_stack
                 current_node = stack_pop(node_stack);
+                // process end of AST_NODE_TYPE_BLOCKQUOTE in AST_NODE_TYPE_BLOCKQUOTE
+                // previous node is AST_NODE_TYPE_BLOCKQUOTE and current node is AST_NODE_TYPE_BLOCKQUOTE
+                if(current_node->type==AST_NODE_TYPE_BLOCKQUOTE && current_syntax.type==AST_NODE_TYPE_BLOCKQUOTE){
+                    current_node = stack_pop(node_stack);
+                }
                 // skip syntax
                 i += strlen(current_syntax.end) - 1;
                 is_break = true;
@@ -192,6 +197,22 @@ ast_node *parse(char *text, size_t text_size) {
                 // change current node
                 current_node = stack_pop(node_stack);
                 i += strlen(current_syntax.end) - 1;
+                is_break = true;
+                break;
+            }
+            // process AST_NODE_TYPE_BLOCKQUOTE in AST_NODE_TYPE_BLOCKQUOTE
+            if(current_node->type==AST_NODE_TYPE_BLOCKQUOTE && current_syntax.type==AST_NODE_TYPE_BLOCKQUOTE &&
+                    str_buf_size == 0 && starts_with(text + i, text_size - i, current_syntax.start)){
+                // create new node
+                ast_node *new_node = ast_node_new(current_syntax.type, NULL, 0, i);
+                // add new node to current node
+                ast_node_add_child(current_node, new_node);
+                // push current node to node_stack
+                stack_push(node_stack, current_node);
+                // set new node as current node
+                current_node = new_node;
+                // skip syntax
+                i += strlen(current_syntax.start) - 1;
                 is_break = true;
                 break;
             }
