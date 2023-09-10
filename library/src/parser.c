@@ -31,10 +31,20 @@ struct syntax syntax_defines[] = {
         {"__",      "__",        AST_NODE_TYPE_UNDERLINE},
         {"~~",      "~~",        AST_NODE_TYPE_STRIKE},
         {"> ",      "\n",          AST_NODE_TYPE_BLOCKQUOTE, true},
-        {"##",      "\n",        AST_NODE_TYPE_COMMENT},
-        {"[",       "]",         AST_NODE_TYPE_FUNCTION},
-        {" * ",     "",          AST_NODE_TYPE_LIST},
-        {"--",      "--",        AST_NODE_TYPE_STRIKE},
+        {"##",      "\n",          AST_NODE_TYPE_COMMENT},
+        {"[",       "]",           AST_NODE_TYPE_FUNCTION},
+        {" * ",     "",            AST_NODE_TYPE_LIST},
+        {"--",      "--",          AST_NODE_TYPE_STRIKE},
+        {"{{{+1 ", "}}}",          AST_NODE_TYPE_BIG_TEXT_1},
+        {"{{{+2 ", "}}}",          AST_NODE_TYPE_BIG_TEXT_2},
+        {"{{{+3 ", "}}}",          AST_NODE_TYPE_BIG_TEXT_3},
+        {"{{{+4 ", "}}}",          AST_NODE_TYPE_BIG_TEXT_4},
+        {"{{{+5 ", "}}}",          AST_NODE_TYPE_BIG_TEXT_5},
+        {"{{{#!wiki ",      "}}}", AST_NODE_TYPE_WIKI},
+        {"{{{#",      "}}}",          AST_NODE_TYPE_COLOR},
+        {"{{{",    "}}}",          AST_NODE_TYPE_NO_WIKI},
+        {"^^",      "^^",          AST_NODE_TYPE_UPPER_TEXT},
+        {",,",      ",,",          AST_NODE_TYPE_LOWER_TEXT},
 };
 
 // get syntax by type
@@ -102,7 +112,7 @@ bool starts_with(const char *text, size_t text_size, char *prefix) {
 // parser
 ast_node *parse(char *text, size_t text_size) {
     // create root node
-    ast_node *root = ast_node_new(AST_NODE_TYPE_ROOT, NULL, 0, 0);
+    ast_node *root = ast_node_new(AST_NODE_TYPE_ROOT, NULL, 0, AST_DATA_TYPE_NONE, 0);
     // create node_stack
     stack *node_stack = stack_new();
     // create current node
@@ -127,8 +137,10 @@ ast_node *parse(char *text, size_t text_size) {
         }
         for (size_t j = 0; j < sizeof(syntax_defines) / sizeof(struct syntax); j++) {
             struct syntax current_syntax = syntax_defines[j];
+            // !!! SYNTAX END STRING !!!
             // find syntax end
             if (current_node->type == current_syntax.type && starts_with(text + i, text_size - i, current_syntax.end)) {
+                // !!! MAKE TEXT NODE !!!
                 if (str_buf_size > 0) {
                     // check previous node type is text
                     if (current_node->children_size > 0 &&
@@ -153,7 +165,7 @@ ast_node *parse(char *text, size_t text_size) {
                         str_buf[0] = '\0';
                     } else {
                         // create new node
-                        ast_node *new_node = ast_node_new(AST_NODE_TYPE_TEXT, str_buf, str_buf_size, i);
+                        ast_node *new_node = ast_node_new(AST_NODE_TYPE_TEXT, str_buf, str_buf_size, AST_DATA_TYPE_STRING, i);
                         // add new node to current node
                         ast_node_add_child(current_node, new_node);
                         // reset str_buf
@@ -176,6 +188,7 @@ ast_node *parse(char *text, size_t text_size) {
                 is_break = true;
                 break;
             }
+            // !!! WRONG SYNTAX END STRING !!!
                 // find wrong syntax
             else if (strlen(current_syntax.end) != 0 && starts_with(text + i, text_size - i, current_syntax.end)
                      && type_exists_in_stack(node_stack, current_syntax.type)) {
@@ -207,7 +220,7 @@ ast_node *parse(char *text, size_t text_size) {
             if(current_node->type==AST_NODE_TYPE_BLOCKQUOTE && current_syntax.type==AST_NODE_TYPE_BLOCKQUOTE &&
                     str_buf_size == 0 && starts_with(text + i, text_size - i, current_syntax.start)){
                 // create new node
-                ast_node *new_node = ast_node_new(current_syntax.type, NULL, 0, i);
+                ast_node *new_node = ast_node_new(current_syntax.type, NULL, 0, AST_DATA_TYPE_NONE, i);
                 // add new node to current node
                 ast_node_add_child(current_node, new_node);
                 // push current node to node_stack
@@ -263,7 +276,7 @@ ast_node *parse(char *text, size_t text_size) {
                         str_buf_size = 0;
                     } else {
                         // create new node
-                        ast_node *new_node = ast_node_new(AST_NODE_TYPE_TEXT, str_buf, str_buf_size, i);
+                        ast_node *new_node = ast_node_new(AST_NODE_TYPE_TEXT, str_buf, str_buf_size, AST_DATA_TYPE_STRING, i);
                         // add new node to current node
                         ast_node_add_child(current_node, new_node);
                         // reset str_buf
@@ -272,7 +285,7 @@ ast_node *parse(char *text, size_t text_size) {
                     }
                 }
                 // create new node
-                ast_node *new_node = ast_node_new(current_syntax.type, NULL, 0, i);
+                ast_node *new_node = ast_node_new(current_syntax.type, NULL, 0, AST_DATA_TYPE_NONE, i);
                 // add new node to current node
                 ast_node_add_child(current_node, new_node);
                 // push current node to node_stack
@@ -306,7 +319,7 @@ ast_node *parse(char *text, size_t text_size) {
                 abort();
             }
             str_buf = buf;
-            // move buf content
+            // move buf content(must use memmove, because str_buf and str_buf+strlen(current_syntax->start) overlaps)
             memmove(str_buf + strlen(current_syntax->start), str_buf, str_buf_size);
             // copy start syntax to buf
             memcpy(str_buf, current_syntax->start, strlen(current_syntax->start));
@@ -334,7 +347,7 @@ ast_node *parse(char *text, size_t text_size) {
             previous_node->data_size += str_buf_size;
         } else {
             // create new node
-            ast_node *new_node = ast_node_new(AST_NODE_TYPE_TEXT, str_buf, str_buf_size, text_size);
+            ast_node *new_node = ast_node_new(AST_NODE_TYPE_TEXT, str_buf, str_buf_size, AST_DATA_TYPE_STRING, text_size);
             // add new node to current node
             ast_node_add_child(root, new_node);
         }

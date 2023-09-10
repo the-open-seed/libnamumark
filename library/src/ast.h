@@ -31,6 +31,27 @@ extern "C" {
 #define AST_NODE_TYPE_COMMENT 15
 #define AST_NODE_TYPE_FUNCTION 16
 #define AST_NODE_TYPE_LIST 17
+#define AST_NODE_TYPE_BIG_TEXT_1 18
+#define AST_NODE_TYPE_BIG_TEXT_2 19
+#define AST_NODE_TYPE_BIG_TEXT_3 20
+#define AST_NODE_TYPE_BIG_TEXT_4 21
+#define AST_NODE_TYPE_BIG_TEXT_5 22
+#define AST_NODE_TYPE_UPPER_TEXT 23
+#define AST_NODE_TYPE_LOWER_TEXT 24
+#define AST_NODE_TYPE_NO_WIKI 25
+#define AST_NODE_TYPE_WIKI 26
+#define AST_NODE_TYPE_COLOR 27
+
+    // AST data types
+#define AST_DATA_TYPE_NONE 0
+#define AST_DATA_TYPE_STRING 1
+#define AST_DATA_TYPE_INT 2
+#define AST_DATA_TYPE_BOOL 3
+#define AST_DATA_TYPE_FLOAT 4
+#define AST_DATA_TYPE_TABLE 5
+#define AST_DATA_TYPE_STYLE 6
+#define AST_DATA_TYPE_ARGUMENT 7
+
 // AST node structure
 typedef struct ast_node {
     int type;
@@ -42,11 +63,13 @@ typedef struct ast_node {
     void *data;
     // data size
     size_t data_size;
+    // data type
+    int data_type;
     // index in text
     size_t index;
 } ast_node;
 // AST node functions
-ast_node *ast_node_new(int type, void *data, size_t data_size, size_t index);
+ast_node *ast_node_new(int type, void *data, size_t data_size, int data_type, size_t index);
 void ast_node_add_child(ast_node *parent, ast_node *child);
 void ast_node_free(ast_node *node);
 void ast_node_remove_child(ast_node *parent, size_t index);

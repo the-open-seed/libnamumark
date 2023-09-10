@@ -5,7 +5,7 @@
 #include "ast.h"
 
 // AST node functions
-ast_node *ast_node_new(int type, void *data, size_t data_size, size_t index) {
+ast_node *ast_node_new(int type, void *data, size_t data_size, int data_type, size_t index) {
     ast_node *node = malloc(sizeof(ast_node));
     // check if malloc failed
     if (node == NULL) {
@@ -16,6 +16,7 @@ ast_node *ast_node_new(int type, void *data, size_t data_size, size_t index) {
     node->children_size = 0;
     node->data = data;
     node->data_size = data_size;
+    node->data_type = data_type;
     node->index = index;
     return node;
 }
