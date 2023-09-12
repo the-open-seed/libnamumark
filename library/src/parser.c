@@ -556,5 +556,9 @@ ast_node *parse(char *text, size_t text_size) {
             ast_node_add_child(root, new_node);
         }
     }
+    if (node_stack->size > 0) {
+        // TODO: handling improper syntax error
+        abort();
+    }
     return root;
 }
