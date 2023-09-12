@@ -5,6 +5,9 @@ TEST(ParserHeadlineTest, BasicAssertions) {
     char text[] = "= Hello, world!H1 =\n== Hello, world!H2 ==\n";
     printf("text: %s\n", text);
     ast_node *node = parse(text, strlen(text));
+#ifdef DEBUG
+    ast_node_print(node);
+#endif
     EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
     EXPECT_EQ(node->children_size, 2);
     EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_H1);
@@ -19,9 +22,6 @@ TEST(ParserHeadlineTest, BasicAssertions) {
     // check data
     data = (char*)node->children[1]->children[0]->data;
     EXPECT_STREQ(data, "Hello, world!H2");
-#ifdef DEBUG
-    ast_node_print(node);
-#endif
     // free node
     ast_node_free(node);
 }
@@ -30,6 +30,9 @@ TEST(ParserTextTest, BasicAssertions){
     char text[] = "Hello, world!\n'''Hello, world!'''Hello?\nBefore''AA''After\n";
     printf("text: %s\n", text);
     ast_node *node = parse(text, strlen(text));
+#ifdef DEBUG
+    ast_node_print(node);
+#endif
     EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
     EXPECT_EQ(node->children_size, 5);
     EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_TEXT);
@@ -51,14 +54,15 @@ TEST(ParserTextTest, BasicAssertions){
     EXPECT_EQ(node->children[4]->type, AST_NODE_TYPE_TEXT);
     data = (char*)node->children[4]->data;
     EXPECT_STREQ(data, "After\n");
-#ifdef DEBUG
-    ast_node_print(node);
-#endif
+    ast_node_free(node);
 }
 TEST(ParserComplexTextTest, BasicAssertions){
     char text[] = "= H1 =\nHello, world!\n =='''Hello, world!'''Hello?\n== H2 ==\nBefore''AA''After\n";
     printf("text: %s\n", text);
     ast_node *node = parse(text, strlen(text));
+#ifdef DEBUG
+    ast_node_print(node);
+#endif
     EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
     EXPECT_EQ(node->children_size, 8);
     EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_H1);
@@ -93,31 +97,32 @@ TEST(ParserComplexTextTest, BasicAssertions){
     EXPECT_EQ(node->children[7]->type, AST_NODE_TYPE_TEXT);
     data = (char*)node->children[7]->data;
     EXPECT_STREQ(data, "After\n");
-#ifdef DEBUG
-    ast_node_print(node);
-#endif
+    ast_node_free(node);
 }
 
 TEST(ParserEscapeTest, BasicAssertions) {
     char text[] = "\\= H1 =\\d";
     printf("text: %s\n", text);
     ast_node *node = parse(text, strlen(text));
-    printf("node: %p\n", node);
+#ifdef DEBUG
+    ast_node_print(node);
+#endif
     EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
     EXPECT_EQ(node->children_size, 1);
     EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_TEXT);
     EXPECT_EQ(node->children[0]->children_size, 0);
     char* data = (char*)node->children[0]->data;
     EXPECT_STREQ(data, "= H1 =d");
-#ifdef DEBUG
-    ast_node_print(node);
-#endif
+    ast_node_free(node);
 }
 
 TEST(ParserWrongSyntaxTest, BasicAssertions){
     char text[] = "'''a\n= H1 \n wrong!'''";
     printf("text: %s\n", text);
     ast_node *node = parse(text, strlen(text));
+#ifdef DEBUG
+    ast_node_print(node);
+#endif
     EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
     EXPECT_EQ(node->children_size, 1);
     EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_BOLD);
@@ -125,29 +130,31 @@ TEST(ParserWrongSyntaxTest, BasicAssertions){
     EXPECT_EQ(node->children[0]->children[0]->type, AST_NODE_TYPE_TEXT);
     char* data = (char*)node->children[0]->children[0]->data;
     EXPECT_STREQ(data, "a\n= H1 \n wrong!");
-#ifdef DEBUG
-    ast_node_print(node);
-#endif
+    ast_node_free(node);
 }
 
 TEST(ParserWrongHeaderSyntaxTest, BasicAssertions){
     char text[] = "= H1 \n =\nwrong!";
     printf("text: %s\n", text);
     ast_node *node = parse(text, strlen(text));
+#ifdef DEBUG
+    ast_node_print(node);
+#endif
     EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
     EXPECT_EQ(node->children_size, 1);
     EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_TEXT);
     char* data = (char*)node->children[0]->data;
     EXPECT_STREQ(data, "= H1 \n =\nwrong!");
-#ifdef DEBUG
-    ast_node_print(node);
-#endif
+    ast_node_free(node);
 }
 
 TEST(ParserDoubleQuoteTest, BasicAssertions){
     char text[] = "Hello, world!1\n> > Hello, world!2\n> Hello, world!3\nHello, world!4";
     printf("text: %s\n", text);
     ast_node *node = parse(text, strlen(text));
+#ifdef DEBUG
+    ast_node_print(node);
+#endif
     EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
     EXPECT_EQ(node->children_size, 3);
     EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_TEXT);
@@ -166,15 +173,16 @@ TEST(ParserDoubleQuoteTest, BasicAssertions){
     EXPECT_EQ(node->children[2]->type, AST_NODE_TYPE_TEXT);
     data = (char*)node->children[2]->data;
     EXPECT_STREQ(data, "Hello, world!4");
-#ifdef DEBUG
-    ast_node_print(node);
-#endif
+    ast_node_free(node);
 }
 
 TEST(ParserSequenceQuoteTest, BasicAssertions){
     char text[] = "Hello, world!1\n> '''Hello, world!2'''\n> '''Hello, world!3'''\nHello, world!4";
     printf("text: %s\n", text);
     ast_node *node = parse(text, strlen(text));
+#ifdef DEBUG
+    ast_node_print(node);
+#endif
     EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
     EXPECT_EQ(node->children_size, 3);
     EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_TEXT);
@@ -198,7 +206,77 @@ TEST(ParserSequenceQuoteTest, BasicAssertions){
     EXPECT_EQ(node->children[2]->type, AST_NODE_TYPE_TEXT);
     data = (char*)node->children[2]->data;
     EXPECT_STREQ(data, "Hello, world!4");
+    ast_node_free(node);
+}
+
+TEST(ParserColorTextTest, BasicAssertions){
+    char text[] = "Hello, world!1\n{{{#ff0000 Hello, world!2}}}{{{#red Hello, world!3}}}\n{{{#aaa Hello, world!4}}}{{{#ggg Hello, world!5}}}";
+    printf("text: %s\n", text);
+    ast_node *node = parse(text, strlen(text));
 #ifdef DEBUG
     ast_node_print(node);
 #endif
+    EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
+    EXPECT_EQ(node->children_size, 6);
+    EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_TEXT);
+    char* data = (char*)node->children[0]->data;
+    EXPECT_STREQ(data, "Hello, world!1\n");
+    EXPECT_EQ(node->children[1]->type, AST_NODE_TYPE_COLOR);
+    EXPECT_EQ(node->children[1]->data_type, AST_DATA_TYPE_COLOR);
+    EXPECT_EQ(((ast_data_color *)node->children[1]->data)->color_size, 7);
+    EXPECT_STRCASEEQ(((ast_data_color *)node->children[1]->data)->color, "#ff0000");
+    EXPECT_EQ(((ast_data_color *)node->children[1]->data)->dark_color_size, 0);
+    EXPECT_EQ(node->children[1]->children_size, 1);
+    EXPECT_EQ(node->children[1]->children[0]->type, AST_NODE_TYPE_TEXT);
+    data = (char*)node->children[1]->children[0]->data;
+    EXPECT_STREQ(data, "Hello, world!2");
+    EXPECT_EQ(node->children[2]->type, AST_NODE_TYPE_COLOR);
+    EXPECT_EQ(node->children[2]->data_type, AST_DATA_TYPE_COLOR);
+    EXPECT_EQ(((ast_data_color *)node->children[2]->data)->color_size, 4);
+    EXPECT_STRCASEEQ(((ast_data_color *)node->children[2]->data)->color, "#red");
+    EXPECT_EQ(((ast_data_color *)node->children[2]->data)->dark_color_size, 0);
+    EXPECT_EQ(node->children[2]->children_size, 1);
+    EXPECT_EQ(node->children[2]->children[0]->type, AST_NODE_TYPE_TEXT);
+    data = (char*)node->children[2]->children[0]->data;
+    EXPECT_STREQ(data, "Hello, world!3");
+    EXPECT_EQ(node->children[3]->type, AST_NODE_TYPE_TEXT);
+    data = (char*)node->children[3]->data;
+    EXPECT_STREQ(data, "\n");
+    EXPECT_EQ(node->children[4]->type, AST_NODE_TYPE_COLOR);
+    EXPECT_EQ(node->children[4]->data_type, AST_DATA_TYPE_COLOR);
+    EXPECT_EQ(((ast_data_color *)node->children[4]->data)->color_size, 4);
+    EXPECT_STRCASEEQ(((ast_data_color *)node->children[4]->data)->color, "#aaa");
+    EXPECT_EQ(((ast_data_color *)node->children[4]->data)->dark_color_size, 0);
+    EXPECT_EQ(node->children[4]->children_size, 1);
+    EXPECT_EQ(node->children[4]->children[0]->type, AST_NODE_TYPE_TEXT);
+    data = (char*)node->children[4]->children[0]->data;
+    EXPECT_STREQ(data, "Hello, world!4");
+    EXPECT_EQ(node->children[5]->type, AST_NODE_TYPE_NO_WIKI);
+    EXPECT_EQ(node->children[5]->children_size, 1);
+    EXPECT_EQ(node->children[5]->children[0]->type, AST_NODE_TYPE_TEXT);
+    data = (char*)node->children[5]->children[0]->data;
+    EXPECT_STREQ(data, "#ggg Hello, world!5");
+    ast_node_free(node);
+}
+
+TEST(ParserDarkColorTextTest, BasicAssertions){
+    char text[] = "{{{#ff0000,#blue Hello, world!2}}}";
+    printf("text: %s\n", text);
+    ast_node *node = parse(text, strlen(text));
+#ifdef DEBUG
+    ast_node_print(node);
+#endif
+    EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
+    EXPECT_EQ(node->children_size, 1);
+    EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_COLOR);
+    EXPECT_EQ(node->children[0]->data_type, AST_DATA_TYPE_COLOR);
+    EXPECT_EQ(((ast_data_color *)node->children[0]->data)->color_size, 7);
+    EXPECT_STRCASEEQ(((ast_data_color *)node->children[0]->data)->color, "#ff0000");
+    EXPECT_EQ(((ast_data_color *)node->children[0]->data)->dark_color_size, 4);
+    EXPECT_STRCASEEQ(((ast_data_color *)node->children[0]->data)->dark_color, "#blue");
+    EXPECT_EQ(node->children[0]->children_size, 1);
+    EXPECT_EQ(node->children[0]->children[0]->type, AST_NODE_TYPE_TEXT);
+    char* data = (char*)node->children[0]->children[0]->data;
+    EXPECT_STREQ(data, "Hello, world!2");
+    ast_node_free(node);
 }

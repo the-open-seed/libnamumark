@@ -51,6 +51,20 @@ extern "C" {
 #define AST_DATA_TYPE_TABLE 5
 #define AST_DATA_TYPE_STYLE 6
 #define AST_DATA_TYPE_ARGUMENT 7
+#define AST_DATA_TYPE_LINK 8
+#define AST_DATA_TYPE_COLOR 9
+typedef struct ast_data_link{
+    char* link;
+    size_t link_size;
+    char* text;
+    size_t text_size;
+} ast_data_link;
+typedef struct ast_data_color{
+    char* color;
+    size_t color_size;
+    char* dark_color;
+    size_t dark_color_size;
+} ast_data_color;
 
 // AST node structure
 typedef struct ast_node {
@@ -68,6 +82,7 @@ typedef struct ast_node {
     // index in text
     size_t index;
 } ast_node;
+
 // AST node functions
 ast_node *ast_node_new(int type, void *data, size_t data_size, int data_type, size_t index);
 void ast_node_add_child(ast_node *parent, ast_node *child);
