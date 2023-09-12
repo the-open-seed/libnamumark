@@ -435,31 +435,31 @@ ast_node *parse(char *text, size_t text_size) {
                 }
 
                 // process AST_NODE_TYPE_COLOR
-                if(current_syntax.type == AST_NODE_TYPE_COLOR && starts_with_color(text + i + strlen(current_syntax.start) - 1, text_size - i - strlen(current_syntax.start) + 1)){
-                    ast_data_color* data = calloc(sizeof(ast_data_color), 1);
-                    if(data == NULL){
+                if(current_syntax.type == AST_NODE_TYPE_COLOR && starts_with_color(text + i + strlen(current_syntax.start) - 1, text_size - i - strlen(current_syntax.start) + 1)) {
+                    ast_data_color *data = calloc(sizeof(ast_data_color), 1);
+                    if (data == NULL) {
                         abort();
                     }
                     // get color
-                    char* color = text + i + strlen(current_syntax.start) - 1;
+                    char *color = text + i + strlen(current_syntax.start) - 1;
                     size_t color_size = 0;
                     size_t max_color_size = text_size - i - strlen(current_syntax.start) + 1;
-                    for(size_t k=0;k<max_color_size;k++){
-                        if(color[k] == ' ' || color[k] == '\n' || color[k] == '\0'){
+                    for (size_t k = 0; k < max_color_size; k++) {
+                        if (color[k] == ' ' || color[k] == '\n' || color[k] == '\0') {
                             break;
                         }
                         color_size++;
                     }
                     size_t dark_color_pos = 0;
-                    for(size_t k=0;k<color_size;k++){
-                        if(color[k] == ','){
+                    for (size_t k = 0; k < color_size; k++) {
+                        if (color[k] == ',') {
                             dark_color_pos = k + 1;
                             break;
                         }
                     }
-                    if(dark_color_pos != 0){
+                    if (dark_color_pos != 0) {
                         data->dark_color = calloc(sizeof(char), dark_color_pos + 1);
-                        if(data->dark_color == NULL){
+                        if (data->dark_color == NULL) {
                             abort();
                         }
                         // #fff,#000 => #default_color,#dark_color
@@ -467,7 +467,7 @@ ast_node *parse(char *text, size_t text_size) {
                         data->dark_color_size = color_size - dark_color_pos - 1;
                     }
                     data->color = calloc(sizeof(char), dark_color_pos == 0 ? color_size + 1 : dark_color_pos);
-                    if(data->color == NULL){
+                    if (data->color == NULL) {
                         abort();
                     }
                     memcpy(data->color, color, dark_color_pos == 0 ? color_size : dark_color_pos - 1);
@@ -484,7 +484,8 @@ ast_node *parse(char *text, size_t text_size) {
                     i += color_size + strlen(current_syntax.start) - 1;
                     is_break = true;
                     break;
-                } else if(current_syntax.type == AST_NODE_TYPE_COLOR){
+                }
+                if(current_syntax.type == AST_NODE_TYPE_COLOR){
                     continue;
                 }
                 // create new node
