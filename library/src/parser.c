@@ -443,7 +443,8 @@ ast_node *parse(char *text, size_t text_size) {
                     // get color
                     char* color = text + i + strlen(current_syntax.start) - 1;
                     size_t color_size = 0;
-                    for(size_t k=0;k<text_size - i - strlen(current_syntax.start) + 1;k++){
+                    size_t max_color_size = text_size - i - strlen(current_syntax.start) + 1;
+                    for(size_t k=0;k<max_color_size;k++){
                         if(color[k] == ' ' || color[k] == '\n' || color[k] == '\0'){
                             break;
                         }
