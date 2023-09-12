@@ -465,7 +465,7 @@ ast_node *parse(char *text, size_t text_size) {
                         memcpy(data->dark_color, color + dark_color_pos, color_size - dark_color_pos);
                         data->dark_color_size = color_size - dark_color_pos - 1;
                     }
-                    data->color = calloc(sizeof(char), color_size + 1);
+                    data->color = calloc(sizeof(char), dark_color_pos == 0 ? color_size + 1 : dark_color_pos);
                     if(data->color == NULL){
                         abort();
                     }
