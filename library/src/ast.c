@@ -86,7 +86,7 @@ void ast_node_print(ast_node *node){
             printf("│  ");
         }
         if(c_node->data_type == AST_DATA_TYPE_STRING) {
-            printf("├data: %s\n", (char *) c_node->data);
+            printf("├data: %s(%zu)\n", (char *) c_node->data, c_node->data_size);
         } else if(c_node->data_type == AST_DATA_TYPE_NONE){
             printf("├data: NONE\n");
         } else if(c_node->data_type == AST_DATA_TYPE_INT){
@@ -103,6 +103,10 @@ void ast_node_print(ast_node *node){
             printf("├data: ARGUMENT\n");
         } else if(c_node->data_type == AST_DATA_TYPE_LINK){
             printf("├data: LINK\n");
+            for(size_t i = 0; i <= depth; i++){
+                printf("│  ");
+            }
+            printf("├link: %s(%zu)\n", ((ast_data_link*)c_node->data)->link, ((ast_data_link*)c_node->data)->link_size);
         } else if(c_node->data_type == AST_DATA_TYPE_COLOR) {
             printf("├data: COLOR\n");
             for(size_t i = 0; i <= depth; i++){
@@ -117,18 +121,10 @@ void ast_node_print(ast_node *node){
         for (size_t i = 0; i < depth; i++) {
             printf("│  ");
         }
-        printf("├data_size: %zu\n", c_node->data_size);
-        for (size_t i = 0; i < depth; i++) {
-            printf("│  ");
-        }
-        printf("%schildren_size: %zu\n", c_node->children_size == 0 ? "└" : "├",c_node->children_size);
+        printf("├children: %s(%zu)\n", c_node->children_size == 0 ? "NONE" : "", c_node->children_size);
         if(c_node->children_size == 0){
             continue;
         }
-        for(size_t i = 0; i < depth; i++){
-            printf("│  ");
-        }
-        printf("├children:\n");
         for (size_t i = c_node->children_size - 1; ; i--) {
             stack_push(depth_stack, (void *) (depth + 1));
             stack_push(n_stack, c_node->children[i]);

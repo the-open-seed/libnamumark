@@ -280,3 +280,50 @@ TEST(ParserDarkColorTextTest, BasicAssertions){
     EXPECT_STREQ(data, "Hello, world!2");
     ast_node_free(node);
 }
+TEST(ParserLinkTest, BasicAssertions){
+    char text[] = "[[example]][[나무마크]][[나무마크|여기가 내용]][[나무마크|{{{+3 여기안에서도 문법이 되겠죠?}}}]]";
+    printf("text: %s\n", text);
+    ast_node *node = parse(text, strlen(text));
+#ifdef DEBUG
+    ast_node_print(node);
+#endif
+    EXPECT_EQ(node->type, AST_NODE_TYPE_ROOT);
+    EXPECT_EQ(node->children_size, 4);
+    EXPECT_EQ(node->children[0]->type, AST_NODE_TYPE_LINK);
+    EXPECT_EQ(node->children[0]->data_type, AST_DATA_TYPE_LINK);
+    EXPECT_EQ(((ast_data_link *)node->children[0]->data)->link_size, 7);
+    EXPECT_STRCASEEQ(((ast_data_link *)node->children[0]->data)->link, "example");
+    EXPECT_EQ(node->children[0]->children_size, 1);
+    EXPECT_EQ(node->children[0]->children[0]->type, AST_NODE_TYPE_TEXT);
+    char* data = (char*)node->children[0]->children[0]->data;
+    EXPECT_STREQ(data, "example");
+    EXPECT_EQ(node->children[1]->type, AST_NODE_TYPE_LINK);
+    EXPECT_EQ(node->children[1]->data_type, AST_DATA_TYPE_LINK);
+    EXPECT_EQ(((ast_data_link *)node->children[1]->data)->link_size, 12);
+    EXPECT_STRCASEEQ(((ast_data_link *)node->children[1]->data)->link, "나무마크");
+    EXPECT_EQ(node->children[1]->children_size, 1);
+    EXPECT_EQ(node->children[1]->children[0]->type, AST_NODE_TYPE_TEXT);
+    data = (char*)node->children[1]->children[0]->data;
+    EXPECT_STREQ(data, "나무마크");
+    // [[link|text]]: link: 나무마크, text: 여기가 내용
+    EXPECT_EQ(node->children[2]->type, AST_NODE_TYPE_LINK);
+    EXPECT_EQ(node->children[2]->data_type, AST_DATA_TYPE_LINK);
+    EXPECT_EQ(((ast_data_link *)node->children[2]->data)->link_size, 12);
+    EXPECT_STRCASEEQ(((ast_data_link *)node->children[2]->data)->link, "나무마크");
+    EXPECT_EQ(node->children[2]->children_size, 1);
+    EXPECT_EQ(node->children[2]->children[0]->type, AST_NODE_TYPE_TEXT);
+    data = (char*)node->children[2]->children[0]->data;
+    EXPECT_STREQ(data, "여기가 내용");
+    // [[나무마크|{{{+3 여기안에서도 문법이 되겠죠?}}}]]
+    EXPECT_EQ(node->children[3]->type, AST_NODE_TYPE_LINK);
+    EXPECT_EQ(node->children[3]->data_type, AST_DATA_TYPE_LINK);
+    EXPECT_EQ(((ast_data_link *)node->children[3]->data)->link_size, 12);
+    EXPECT_STRCASEEQ(((ast_data_link *)node->children[3]->data)->link, "나무마크");
+    EXPECT_EQ(node->children[3]->children_size, 1);
+    EXPECT_EQ(node->children[3]->children[0]->type, AST_NODE_TYPE_BIG_TEXT_3);
+    EXPECT_EQ(node->children[3]->children[0]->children_size, 1);
+    EXPECT_EQ(node->children[3]->children[0]->children[0]->type, AST_NODE_TYPE_TEXT);
+    data = (char*)node->children[3]->children[0]->children[0]->data;
+    EXPECT_STREQ(data, "여기안에서도 문법이 되겠죠?");
+    ast_node_free(node);
+}

@@ -56,8 +56,6 @@ extern "C" {
 typedef struct ast_data_link{
     char* link;
     size_t link_size;
-    char* text;
-    size_t text_size;
 } ast_data_link;
 typedef struct ast_data_color{
     char* color;

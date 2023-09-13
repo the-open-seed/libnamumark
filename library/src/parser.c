@@ -212,7 +212,7 @@ bool check_color(const char *text, size_t text_size) {
 }
 
 // check string starts with hex color('#fff', '#ffffff', '#fff,#000' and so on)
-bool starts_with_color(const char *text, size_t text_size) {
+bool starts_with_color(const char *text, const size_t text_size) {
     // first, split text by ','
     char *text1 = calloc(sizeof(char), text_size + 1);
     if (text1 == NULL) {
@@ -487,6 +487,87 @@ ast_node *parse(char *text, size_t text_size) {
                 }
                 if(current_syntax.type == AST_NODE_TYPE_COLOR){
                     continue;
+                }
+                if(current_syntax.type == AST_NODE_TYPE_LINK){
+                    // find end of link syntax
+                    size_t link_size = 0;
+                    size_t link_split = 0;
+                    bool is_link_syntax = false;
+                    char* link_buf = calloc(sizeof(char), 1);
+                    for(size_t k=i+strlen(current_syntax.start);k<text_size - 1;k++){
+                        link_size++;
+                        if(text[k] == '\\'){
+                            k++;
+                            // realloc link_buf
+                            char *tmp = realloc(link_buf, sizeof(char *) * (link_size + 2));
+                            if (tmp == NULL) {
+                                abort();
+                            }
+                            link_buf = tmp;
+                            link_buf[link_size - 1] = text[k + 1];
+                            link_buf[link_size] = '\0';
+                            continue;
+                        }
+                        if(text[k] == '\n'){
+                            break;
+                        }
+                        if(text[k] == '|' && link_split == 0){
+                            link_split = k;
+                            continue;
+                        }
+                        if(starts_with(text + k, text_size - k, current_syntax.end)){
+                            is_link_syntax = true;
+                            break;
+                        }
+                        // realloc link_buf
+                        char *tmp = realloc(link_buf, sizeof(char *) * (link_size + 2));
+                        if (tmp == NULL) {
+                            abort();
+                        }
+                        link_buf = tmp;
+                        link_buf[link_size - 1] = text[k];
+                        link_buf[link_size] = '\0';
+                    }
+                    if(!is_link_syntax){
+                        free(link_buf);
+                        continue;
+                    }
+                    // create new data struct
+                    ast_data_link *data = calloc(sizeof(ast_data_link), 1);
+                    if (data == NULL) {
+                        abort();
+                    }
+                    if(link_split == 0){
+                        data->link = calloc(sizeof(char), link_size + 1);
+                        if (data->link == NULL) {
+                            abort();
+                        }
+                        memcpy(data->link, link_buf, link_size);
+                        data->link_size = link_size - 1;
+                    } else{
+                        data->link = calloc(sizeof(char), link_split + 1);
+                        if (data->link == NULL) {
+                            abort();
+                        }
+                        memcpy(data->link, text + i + 2, link_split - i - 2);
+                        data->link[link_split - 1 - i] = '\0';
+                        data->link_size = link_split - i - 2;
+                    }
+                    // create new node
+                    ast_node *new_node = ast_node_new(current_syntax.type, data, 1, AST_DATA_TYPE_LINK, i);
+                    // add new node to current node
+                    ast_node_add_child(current_node, new_node);
+                    // push current node to node_stack
+                    stack_push(node_stack, current_node);
+                    // set new node as current node
+                    current_node = new_node;
+                    // skip syntax
+                    i += strlen(current_syntax.start) - 1;
+                    if(link_split != 0){
+                        i = link_split;
+                    }
+                    is_break = true;
+                    break;
                 }
                 // create new node
                 ast_node *new_node = ast_node_new(current_syntax.type, NULL, 0, AST_DATA_TYPE_NONE, i);
