@@ -278,7 +278,8 @@ ast_node *parse(char *text, size_t text_size) {
             struct syntax current_syntax = syntax_defines[j];
             // !!! SYNTAX END STRING !!!
             // find syntax end
-            if (current_node->type == current_syntax.type && starts_with(text + i, text_size - i, current_syntax.end)) {
+            bool is_syntax_end = starts_with(text + i, text_size - i, current_syntax.end);
+            if (current_node->type == current_syntax.type && is_syntax_end) {
                 // !!! MAKE TEXT NODE !!!
                 if (str_buf_size > 0) {
                     // check previous node type is text
@@ -326,8 +327,7 @@ ast_node *parse(char *text, size_t text_size) {
             }
                 // !!! WRONG SYNTAX END STRING !!!
                 // find wrong syntax
-            else if (strlen(current_syntax.end) != 0 && starts_with(text + i, text_size - i, current_syntax.end)
-                     && type_exists_in_stack(node_stack, current_syntax.type)) {
+            else if (strlen(current_syntax.end) != 0 && is_syntax_end && type_exists_in_stack(node_stack, current_syntax.type)) {
                 // resize buf
                 char *buf = realloc(str_buf, sizeof(char) * (str_buf_size + strlen(current_syntax.end)) + 1);
                 if (buf == NULL) {
@@ -362,9 +362,10 @@ ast_node *parse(char *text, size_t text_size) {
                 is_break = true;
                 break;
             }
+            // !!! SYNTAX START STRING !!!
+            bool is_syntax_start = starts_with(text + i, text_size - i, current_syntax.start);
             // process AST_NODE_TYPE_BLOCKQUOTE in AST_NODE_TYPE_BLOCKQUOTE
-            if (current_node->type == AST_NODE_TYPE_BLOCKQUOTE && current_syntax.type == current_node->type && str_buf_size == 0
-                    && starts_with(text + i, text_size - i, current_syntax.start)) {
+            if (current_node->type == AST_NODE_TYPE_BLOCKQUOTE && current_syntax.type == current_node->type && str_buf_size == 0 && is_syntax_start) {
                 // create new node
                 ast_node *new_node = ast_node_new(current_syntax.type, NULL, 0, AST_DATA_TYPE_NONE, i);
                 // add new node to current node
@@ -379,8 +380,7 @@ ast_node *parse(char *text, size_t text_size) {
                 break;
             }
             // find syntax start
-            if (starts_with(text + i, text_size - i, current_syntax.start) &&
-                (!current_syntax.is_line || i == 0 || text[i - 1] == '\n')) {
+            if (is_syntax_start && (!current_syntax.is_line || i == 0 || text[i - 1] == '\n')) {
                 // check previous node type is quote
                 if (str_buf_size == 0 && current_node->children_size > 0 &&
                     current_node->children[current_node->children_size - 1]->type == AST_NODE_TYPE_BLOCKQUOTE) {
@@ -494,6 +494,7 @@ ast_node *parse(char *text, size_t text_size) {
                     size_t link_split = 0;
                     bool is_link_syntax = false;
                     char* link_buf = calloc(sizeof(char), 1);
+                    // get link. we get all things needed to create link node at once
                     for(size_t k=i+strlen(current_syntax.start);k<text_size - 1;k++){
                         link_size++;
                         if(text[k] == '\\'){
