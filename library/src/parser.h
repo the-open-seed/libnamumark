@@ -13,7 +13,7 @@ extern "C" {
 #include <string.h>
 #include <stdbool.h>
 
-ast_node* parse(char* text, size_t text_size);
+ast_node* parse(const char* text, const size_t text_size);
 #ifdef __cplusplus
 }
 #endif

@@ -49,7 +49,8 @@ struct syntax syntax_defines[] = {
 };
 
 const size_t named_colors_size = 147;
-const char named_colors[147][21] = {"aliceblue", "antiquewhite", "aqua", "aquamarine", "azure", "beige", "bisque", "black",
+// Warning: MUST Check String Length(MAX: 29) before adding new color
+const char named_colors[][30] = {"aliceblue", "antiquewhite", "aqua", "aquamarine", "azure", "beige", "bisque", "black",
                                     "blanchedalmond", "blue", "blueviolet", "brown", "burlywood", "cadetblue", "chartreuse",
                                     "chocolate", "coral", "cornflowerblue", "cornsilk", "crimson", "cyan", "darkblue",
                                     "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkgrey", "darkkhaki",
@@ -249,7 +250,7 @@ bool starts_with_color(const char *text, const size_t text_size) {
 
 // Just perform the parsing process
 // parser
-ast_node *parse(char *text, size_t text_size) {
+ast_node *parse(const char *text, const size_t text_size) {
     // create root node
     ast_node *root = ast_node_new(AST_NODE_TYPE_ROOT, NULL, 0, AST_DATA_TYPE_NONE, 0);
     // create node_stack
@@ -274,7 +275,8 @@ ast_node *parse(char *text, size_t text_size) {
             i++;
             continue;
         }
-        for (size_t j = 0; j < sizeof(syntax_defines) / sizeof(struct syntax); j++) {
+        const size_t syntax_defines_size = sizeof(syntax_defines) / sizeof(struct syntax);
+        for (size_t j = 0; j < syntax_defines_size; j++) {
             struct syntax current_syntax = syntax_defines[j];
             // !!! SYNTAX END STRING !!!
             // find syntax end
@@ -317,8 +319,10 @@ ast_node *parse(char *text, size_t text_size) {
                 // pop current node from node_stack
                 current_node = stack_pop(node_stack);
                 // process end of AST_NODE_TYPE_BLOCKQUOTE in AST_NODE_TYPE_BLOCKQUOTE
-                while (current_syntax.type == AST_NODE_TYPE_BLOCKQUOTE && current_node->type == AST_NODE_TYPE_BLOCKQUOTE) {
-                    current_node = stack_pop(node_stack);
+                if(current_syntax.type == AST_NODE_TYPE_BLOCKQUOTE) {
+                    while (current_node->type == AST_NODE_TYPE_BLOCKQUOTE) {
+                        current_node = stack_pop(node_stack);
+                    }
                 }
                 // skip syntax
                 i += strlen(current_syntax.end) - 1;
@@ -339,7 +343,7 @@ ast_node *parse(char *text, size_t text_size) {
                                                          ((ast_node *) node_stack->data[node_stack->size - 1])->type)
                 ];
                 str_buf_size = 0;
-                for(char *p = text + current_node->index; p < text + i; p++){
+                for(const char *p = text + current_node->index; p < text + i; p++){
                     if(*p == '\\'){
                         p++;
                     }
@@ -441,7 +445,7 @@ ast_node *parse(char *text, size_t text_size) {
                         abort();
                     }
                     // get color
-                    char *color = text + i + strlen(current_syntax.start) - 1;
+                    const char *color = text + i + strlen(current_syntax.start) - 1;
                     size_t color_size = 0;
                     size_t max_color_size = text_size - i - strlen(current_syntax.start) + 1;
                     for (size_t k = 0; k < max_color_size; k++) {
