@@ -86,7 +86,7 @@ struct syntax *get_syntax_by_type(int type) {
 // we just use this once(might?)
 // get ast_node in stack match type
 // explanation: if we have a stack like this:
-// [AST_NODE_TYPE_H1, AST_NODE_TYPE_H2, AST_NODE_TYPE_H3, AST_NODE_TYPE_H4, AST_NODE_TYPE_H5, AST_NODE_TYPE_H6]
+// [AST_NODE_TYPE_H1, AST_NODE_TYPE_H2, AST_NODE_TYPE_H3, AST_NODE_TYPE_H4, AST_NODE_TYPE_H5, AST_NODE_TYPE_H6](type only for example)
 // and we want to get AST_NODE_TYPE_H3, we can use this function
 // if we want to get AST_NODE_TYPE_H1, we can use this function too
 // but if we want to get AST_NODE_TYPE_LINK, we can't use this function
