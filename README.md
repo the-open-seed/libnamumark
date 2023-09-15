@@ -1,7 +1,6 @@
 # libnamumark
 ![Build Status](https://github.com/the-open-seed/libnamumark/actions/workflows/c-cpp.yml/badge.svg)
 ![Build Status](https://github.com/the-open-seed/libnamumark/actions/workflows/codeql.yml/badge.svg)
-![Build Status](https://github.com/the-open-seed/libnamumark/actions/workflows/flawfinder.yml/badge.svg)
 ![License](https://img.shields.io/github/license/the-open-seed/libnamumark)
 ## About
 libnamumark is a library for parsing NamuMark written in C.
