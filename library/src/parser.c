@@ -13,25 +13,32 @@ struct syntax {
     char *start;
     char *end;
     int type;
-    bool is_line;
+    size_t flags;
 };
 
-
+#define SYNTAX_FLAG_LINE (0x01 << 0)
+#define SYNTAX_FLAG_COLLAPSE (0x01 << 1)
 // define syntax_defines
 struct syntax syntax_defines[] = {
         {"[* ",        "]",         AST_NODE_TYPE_FOOTNOTE},
-        {"= ",         " =\n",      AST_NODE_TYPE_H1,         true},
-        {"== ",        " ==\n",     AST_NODE_TYPE_H2,         true},
-        {"=== ",       " ===\n",    AST_NODE_TYPE_H3,         true},
-        {"==== ",      " ====\n",   AST_NODE_TYPE_H4,         true},
-        {"===== ",     " =====\n",  AST_NODE_TYPE_H5,         true},
-        {"====== ",    " ======\n", AST_NODE_TYPE_H6,         true},
+        {"= ",         " =\n",      AST_NODE_TYPE_H1,         SYNTAX_FLAG_LINE},
+        {"== ",        " ==\n",     AST_NODE_TYPE_H2,         SYNTAX_FLAG_LINE},
+        {"=== ",       " ===\n",    AST_NODE_TYPE_H3,         SYNTAX_FLAG_LINE},
+        {"==== ",      " ====\n",   AST_NODE_TYPE_H4,         SYNTAX_FLAG_LINE},
+        {"===== ",     " =====\n",  AST_NODE_TYPE_H5,         SYNTAX_FLAG_LINE},
+        {"====== ",    " ======\n", AST_NODE_TYPE_H6,         SYNTAX_FLAG_LINE},
+        {"=# ", " #=", AST_NODE_TYPE_H1, SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
+        {"==# ", " #==", AST_NODE_TYPE_H2, SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
+        {"===# ", " #===", AST_NODE_TYPE_H3, SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
+        {"====# ", " #====", AST_NODE_TYPE_H4, SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
+        {"=====# ", " #=====", AST_NODE_TYPE_H5, SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
+        {"======# ", " #======", AST_NODE_TYPE_H6, SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
         {"[[",         "]]",        AST_NODE_TYPE_LINK},
         {"'''",        "'''",       AST_NODE_TYPE_BOLD},
         {"''",         "''",        AST_NODE_TYPE_ITALIC},
         {"__",         "__",        AST_NODE_TYPE_UNDERLINE},
         {"~~",         "~~",        AST_NODE_TYPE_STRIKE},
-        {"> ",         "\n",        AST_NODE_TYPE_BLOCKQUOTE, true},
+        {"> ",         "\n",        AST_NODE_TYPE_BLOCKQUOTE, SYNTAX_FLAG_LINE},
         {"##",         "\n",        AST_NODE_TYPE_COMMENT},
         {"[",          "]",         AST_NODE_TYPE_FUNCTION},
         {" * ",        "",          AST_NODE_TYPE_LIST},
@@ -384,7 +391,7 @@ ast_node *parse(const char *text, const size_t text_size) {
                 break;
             }
             // find syntax start
-            if (is_syntax_start && (!current_syntax.is_line || i == 0 || text[i - 1] == '\n')) {
+            if (is_syntax_start && (!(current_syntax.flags&SYNTAX_FLAG_LINE) || i == 0 || text[i - 1] == '\n')) {
                 // check previous node type is quote
                 if (str_buf_size == 0 && current_node->children_size > 0 &&
                     current_node->children[current_node->children_size - 1]->type == AST_NODE_TYPE_BLOCKQUOTE) {
