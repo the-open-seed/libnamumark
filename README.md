@@ -24,7 +24,6 @@ NamuMark is a markup language used in Namuwiki and forked from moinmoin's markup
 - - [X] Links
 - - - [X] Normal link
 - - - [X] Renamed link
-- - [ ] Anchors
 - - [X] Footnotes
 - - [ ] Table
 - - - [ ] Table caption
@@ -40,6 +39,6 @@ NamuMark is a markup language used in Namuwiki and forked from moinmoin's markup
 - - - [X] Nested blockquote
 - - - [X] Blockquote multiline
 - - [ ] Horizontal line
-- - [ ] Function(Macro)
+- - [X] Function(Macro)
 - - - [ ] Function with arguments
 - - [ ] Math
