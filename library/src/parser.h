@@ -7,13 +7,15 @@
 extern "C" {
 #endif
 #define LIBNAMUMARK_PARSER_H
+
 #include "ast.h"
 #include "stack.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
-ast_node* parse(const char* text, const size_t text_size);
+ast_node *parse(const char *text, const size_t text_size);
+
 #ifdef __cplusplus
 }
 #endif

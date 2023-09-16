@@ -4,6 +4,7 @@
 #include "stack.h"
 
 #include <stdlib.h>
+
 // stack functions
 stack *stack_new(void) {
     stack *new_stack = malloc(sizeof(stack));
@@ -28,13 +29,13 @@ void stack_push(stack *stack, void *data) {
 }
 
 void *stack_pop(stack *stack) {
-    if(stack->size==0){
+    if (stack->size == 0) {
         return NULL;
     }
     void *data = stack->data[stack->size - 1];
     void **new_data = realloc(stack->data, sizeof(void *) * (stack->size - 1));
     // check if realloc failed
-    if (stack->size-1!=0 && new_data == NULL) {
+    if (stack->size - 1 != 0 && new_data == NULL) {
         abort();
     }
     stack->data = new_data;
@@ -51,9 +52,9 @@ void stack_free(stack *stack) {
     free(stack);
 }
 
-void* stack_top(stack* stack){
-    if(stack->size==0){
+void *stack_top(stack *stack) {
+    if (stack->size == 0) {
         return NULL;
     }
-    return stack->data[stack->size-1];
+    return stack->data[stack->size - 1];
 }

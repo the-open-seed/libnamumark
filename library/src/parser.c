@@ -27,12 +27,12 @@ struct syntax syntax_defines[] = {
         {"==== ",      " ====\n",   AST_NODE_TYPE_H4,         SYNTAX_FLAG_LINE},
         {"===== ",     " =====\n",  AST_NODE_TYPE_H5,         SYNTAX_FLAG_LINE},
         {"====== ",    " ======\n", AST_NODE_TYPE_H6,         SYNTAX_FLAG_LINE},
-        {"=# ", " #=", AST_NODE_TYPE_H1, SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
-        {"==# ", " #==", AST_NODE_TYPE_H2, SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
-        {"===# ", " #===", AST_NODE_TYPE_H3, SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
-        {"====# ", " #====", AST_NODE_TYPE_H4, SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
-        {"=====# ", " #=====", AST_NODE_TYPE_H5, SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
-        {"======# ", " #======", AST_NODE_TYPE_H6, SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
+        {"=# ",        " #=",       AST_NODE_TYPE_H1,         SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
+        {"==# ",       " #==",      AST_NODE_TYPE_H2,         SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
+        {"===# ",      " #===",     AST_NODE_TYPE_H3,         SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
+        {"====# ",     " #====",    AST_NODE_TYPE_H4,         SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
+        {"=====# ",    " #=====",   AST_NODE_TYPE_H5,         SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
+        {"======# ",   " #======",  AST_NODE_TYPE_H6,         SYNTAX_FLAG_LINE | SYNTAX_FLAG_COLLAPSE},
         {"[[",         "]]",        AST_NODE_TYPE_LINK},
         {"'''",        "'''",       AST_NODE_TYPE_BOLD},
         {"''",         "''",        AST_NODE_TYPE_ITALIC},
@@ -58,27 +58,37 @@ struct syntax syntax_defines[] = {
 const size_t named_colors_size = 147;
 // Warning: MUST Check String Length(MAX: 29) before adding new color
 const char named_colors[][30] = {"aliceblue", "antiquewhite", "aqua", "aquamarine", "azure", "beige", "bisque", "black",
-                                    "blanchedalmond", "blue", "blueviolet", "brown", "burlywood", "cadetblue", "chartreuse",
-                                    "chocolate", "coral", "cornflowerblue", "cornsilk", "crimson", "cyan", "darkblue",
-                                    "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkgrey", "darkkhaki",
-                                    "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred", "darksalmon",
-                                    "darkseagreen", "darkslateblue", "darkslategray", "darkslategrey", "darkturquoise",
-                                    "darkviolet", "deeppink", "deepskyblue", "dimgray", "dimgrey", "dodgerblue", "firebrick",
-                                    "floralwhite", "forestgreen", "fuchsia", "gainsboro", "ghostwhite", "gold", "goldenrod",
-                                    "gray", "green", "greenyellow", "grey", "honeydew", "hotpink", "indianred", "indigo",
-                                    "ivory", "khaki", "lavender", "lavenderblush", "lawngreen", "lemonchiffon", "lightblue",
-                                    "lightcoral", "lightcyan", "lightgoldenrodyellow", "lightgray", "lightgreen", "lightgrey",
-                                    "lightpink", "lightsalmon", "lightseagreen", "lightskyblue", "lightslategray",
-                                    "lightslategrey", "lightsteelblue", "lightyellow", "lime", "limegreen", "linen", "magenta",
-                                    "maroon", "mediumaquamarine", "mediumblue", "mediumorchid", "mediumpurple",
-                                    "mediumseagreen", "mediumslateblue", "mediumspringgreen", "mediumturquoise",
-                                    "mediumvioletred", "midnightblue", "mintcream", "mistyrose", "moccasin", "navajowhite",
-                                    "navy", "oldlace", "olive", "olivedrab", "orange", "orangered", "orchid", "palegoldenrod",
-                                    "palegreen", "paleturquoise", "palevioletred", "papayawhip", "peachpuff", "peru", "pink",
-                                    "plum", "powderblue", "purple", "red", "rosybrown", "royalblue", "saddlebrown", "salmon",
-                                    "sandybrown", "seagreen", "seashell", "sienna", "silver", "skyblue", "slateblue",
-                                    "slategray", "slategrey", "snow", "springgreen", "steelblue", "tan", "teal", "thistle",
-                                    "tomato", "turquoise", "violet", "wheat", "white", "whitesmoke", "yellow", "yellowgreen"};
+                                 "blanchedalmond", "blue", "blueviolet", "brown", "burlywood", "cadetblue",
+                                 "chartreuse",
+                                 "chocolate", "coral", "cornflowerblue", "cornsilk", "crimson", "cyan", "darkblue",
+                                 "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkgrey", "darkkhaki",
+                                 "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred", "darksalmon",
+                                 "darkseagreen", "darkslateblue", "darkslategray", "darkslategrey", "darkturquoise",
+                                 "darkviolet", "deeppink", "deepskyblue", "dimgray", "dimgrey", "dodgerblue",
+                                 "firebrick",
+                                 "floralwhite", "forestgreen", "fuchsia", "gainsboro", "ghostwhite", "gold",
+                                 "goldenrod",
+                                 "gray", "green", "greenyellow", "grey", "honeydew", "hotpink", "indianred", "indigo",
+                                 "ivory", "khaki", "lavender", "lavenderblush", "lawngreen", "lemonchiffon",
+                                 "lightblue",
+                                 "lightcoral", "lightcyan", "lightgoldenrodyellow", "lightgray", "lightgreen",
+                                 "lightgrey",
+                                 "lightpink", "lightsalmon", "lightseagreen", "lightskyblue", "lightslategray",
+                                 "lightslategrey", "lightsteelblue", "lightyellow", "lime", "limegreen", "linen",
+                                 "magenta",
+                                 "maroon", "mediumaquamarine", "mediumblue", "mediumorchid", "mediumpurple",
+                                 "mediumseagreen", "mediumslateblue", "mediumspringgreen", "mediumturquoise",
+                                 "mediumvioletred", "midnightblue", "mintcream", "mistyrose", "moccasin", "navajowhite",
+                                 "navy", "oldlace", "olive", "olivedrab", "orange", "orangered", "orchid",
+                                 "palegoldenrod",
+                                 "palegreen", "paleturquoise", "palevioletred", "papayawhip", "peachpuff", "peru",
+                                 "pink",
+                                 "plum", "powderblue", "purple", "red", "rosybrown", "royalblue", "saddlebrown",
+                                 "salmon",
+                                 "sandybrown", "seagreen", "seashell", "sienna", "silver", "skyblue", "slateblue",
+                                 "slategray", "slategrey", "snow", "springgreen", "steelblue", "tan", "teal", "thistle",
+                                 "tomato", "turquoise", "violet", "wheat", "white", "whitesmoke", "yellow",
+                                 "yellowgreen"};
 
 // get syntax by type
 struct syntax *get_syntax_by_type(int type) {
@@ -198,15 +208,16 @@ bool check_6_digit_hex_color(const char *text, size_t text_size) {
 
 // check string starts with named color('red', 'blue' and so on)
 bool check_named_color(const char *text, size_t text_size) {
-    if(text[0] != '#'){
+    if (text[0] != '#') {
         return false;
     }
-    for(size_t i=0;i<named_colors_size;i++){
-        const char* current = named_colors[i];
-        if(starts_with(text + 1, text_size - 1, current)){
+    for (size_t i = 0; i < named_colors_size; i++) {
+        const char *current = named_colors[i];
+        if (starts_with(text + 1, text_size - 1, current)) {
             // check if hex ends with ' ', '\n', or '\0', if not, return false
             size_t current_size = strlen(current);
-            if (text_size - 1 > current_size && text[current_size + 1] != ' ' && text[current_size + 1] != '\n' && text[current_size + 1] != '\0' && text[current_size + 1] != ',') {
+            if (text_size - 1 > current_size && text[current_size + 1] != ' ' && text[current_size + 1] != '\n' &&
+                text[current_size + 1] != '\0' && text[current_size + 1] != ',') {
                 return false;
             }
             return true;
@@ -216,7 +227,8 @@ bool check_named_color(const char *text, size_t text_size) {
 }
 
 bool check_color(const char *text, size_t text_size) {
-    return check_3_digit_hex_color(text, text_size) || check_6_digit_hex_color(text, text_size) || check_named_color(text, text_size);
+    return check_3_digit_hex_color(text, text_size) || check_6_digit_hex_color(text, text_size) ||
+           check_named_color(text, text_size);
 }
 
 // check string starts with hex color('#fff', '#ffffff', '#fff,#000' and so on)
@@ -247,7 +259,7 @@ bool starts_with_color(const char *text, const size_t text_size) {
         free(text1);
         return result;
     }
-    if(result && check_color(text2, text_size - (text2 - text1))){
+    if (result && check_color(text2, text_size - (text2 - text1))) {
         free(text1);
         return true;
     }
@@ -326,7 +338,7 @@ ast_node *parse(const char *text, const size_t text_size) {
                 // pop current node from node_stack
                 current_node = stack_pop(node_stack);
                 // process end of AST_NODE_TYPE_BLOCKQUOTE in AST_NODE_TYPE_BLOCKQUOTE
-                if(current_syntax.type == AST_NODE_TYPE_BLOCKQUOTE) {
+                if (current_syntax.type == AST_NODE_TYPE_BLOCKQUOTE) {
                     while (current_node->type == AST_NODE_TYPE_BLOCKQUOTE) {
                         current_node = stack_pop(node_stack);
                     }
@@ -338,7 +350,8 @@ ast_node *parse(const char *text, const size_t text_size) {
             }
                 // !!! WRONG SYNTAX END STRING !!!
                 // find wrong syntax
-            else if (strlen(current_syntax.end) != 0 && is_syntax_end && type_exists_in_stack(node_stack, current_syntax.type)) {
+            else if (strlen(current_syntax.end) != 0 && is_syntax_end &&
+                     type_exists_in_stack(node_stack, current_syntax.type)) {
                 // resize buf
                 char *buf = realloc(str_buf, sizeof(char) * (str_buf_size + strlen(current_syntax.end)) + 1);
                 if (buf == NULL) {
@@ -350,8 +363,8 @@ ast_node *parse(const char *text, const size_t text_size) {
                                                          ((ast_node *) node_stack->data[node_stack->size - 1])->type)
                 ];
                 str_buf_size = 0;
-                for(const char *p = text + current_node->index; p < text + i; p++){
-                    if(*p == '\\'){
+                for (const char *p = text + current_node->index; p < text + i; p++) {
+                    if (*p == '\\') {
                         p++;
                     }
                     str_buf[str_buf_size] = *p;
@@ -376,7 +389,8 @@ ast_node *parse(const char *text, const size_t text_size) {
             // !!! SYNTAX START STRING !!!
             bool is_syntax_start = starts_with(text + i, text_size - i, current_syntax.start);
             // process AST_NODE_TYPE_BLOCKQUOTE in AST_NODE_TYPE_BLOCKQUOTE
-            if (current_node->type == AST_NODE_TYPE_BLOCKQUOTE && current_syntax.type == current_node->type && str_buf_size == 0 && is_syntax_start) {
+            if (current_node->type == AST_NODE_TYPE_BLOCKQUOTE && current_syntax.type == current_node->type &&
+                str_buf_size == 0 && is_syntax_start) {
                 // create new node
                 ast_node *new_node = ast_node_new(current_syntax.type, NULL, 0, AST_DATA_TYPE_NONE, i);
                 // add new node to current node
@@ -391,7 +405,7 @@ ast_node *parse(const char *text, const size_t text_size) {
                 break;
             }
             // find syntax start
-            if (is_syntax_start && (!(current_syntax.flags&SYNTAX_FLAG_LINE) || i == 0 || text[i - 1] == '\n')) {
+            if (is_syntax_start && (!(current_syntax.flags & SYNTAX_FLAG_LINE) || i == 0 || text[i - 1] == '\n')) {
                 // check previous node type is quote
                 if (str_buf_size == 0 && current_node->children_size > 0 &&
                     current_node->children[current_node->children_size - 1]->type == AST_NODE_TYPE_BLOCKQUOTE) {
@@ -446,7 +460,9 @@ ast_node *parse(const char *text, const size_t text_size) {
                 }
 
                 // process AST_NODE_TYPE_COLOR
-                if(current_syntax.type == AST_NODE_TYPE_COLOR && starts_with_color(text + i + strlen(current_syntax.start) - 1, text_size - i - strlen(current_syntax.start) + 1)) {
+                if (current_syntax.type == AST_NODE_TYPE_COLOR &&
+                    starts_with_color(text + i + strlen(current_syntax.start) - 1,
+                                      text_size - i - strlen(current_syntax.start) + 1)) {
                     ast_data_color *data = calloc(sizeof(ast_data_color), 1);
                     if (data == NULL) {
                         abort();
@@ -496,19 +512,19 @@ ast_node *parse(const char *text, const size_t text_size) {
                     is_break = true;
                     break;
                 }
-                if(current_syntax.type == AST_NODE_TYPE_COLOR){
+                if (current_syntax.type == AST_NODE_TYPE_COLOR) {
                     continue;
                 }
-                if(current_syntax.type == AST_NODE_TYPE_LINK){
+                if (current_syntax.type == AST_NODE_TYPE_LINK) {
                     // find end of link syntax
                     size_t link_size = 0;
                     size_t link_split = 0;
                     bool is_link_syntax = false;
-                    char* link_buf = calloc(sizeof(char), 1);
+                    char *link_buf = calloc(sizeof(char), 1);
                     // get link. we get all things needed to create link node at once
-                    for(size_t k=i+strlen(current_syntax.start);k<text_size - 1;k++){
+                    for (size_t k = i + strlen(current_syntax.start); k < text_size - 1; k++) {
                         link_size++;
-                        if(text[k] == '\\'){
+                        if (text[k] == '\\') {
                             k++;
                             // realloc link_buf
                             char *tmp = realloc(link_buf, sizeof(char *) * (link_size + 2));
@@ -520,14 +536,14 @@ ast_node *parse(const char *text, const size_t text_size) {
                             link_buf[link_size] = '\0';
                             continue;
                         }
-                        if(text[k] == '\n'){
+                        if (text[k] == '\n') {
                             break;
                         }
-                        if(text[k] == '|' && link_split == 0){
+                        if (text[k] == '|' && link_split == 0) {
                             link_split = k;
                             continue;
                         }
-                        if(starts_with(text + k, text_size - k, current_syntax.end)){
+                        if (starts_with(text + k, text_size - k, current_syntax.end)) {
                             is_link_syntax = true;
                             break;
                         }
@@ -540,7 +556,7 @@ ast_node *parse(const char *text, const size_t text_size) {
                         link_buf[link_size - 1] = text[k];
                         link_buf[link_size] = '\0';
                     }
-                    if(!is_link_syntax){
+                    if (!is_link_syntax) {
                         free(link_buf);
                         continue;
                     }
@@ -549,14 +565,14 @@ ast_node *parse(const char *text, const size_t text_size) {
                     if (data == NULL) {
                         abort();
                     }
-                    if(link_split == 0){
+                    if (link_split == 0) {
                         data->link = calloc(sizeof(char), link_size + 1);
                         if (data->link == NULL) {
                             abort();
                         }
                         memcpy(data->link, link_buf, link_size);
                         data->link_size = link_size - 1;
-                    } else{
+                    } else {
                         data->link = calloc(sizeof(char), link_split + 1);
                         if (data->link == NULL) {
                             abort();
@@ -575,7 +591,7 @@ ast_node *parse(const char *text, const size_t text_size) {
                     current_node = new_node;
                     // skip syntax
                     i += strlen(current_syntax.start) - 1;
-                    if(link_split != 0){
+                    if (link_split != 0) {
                         i = link_split;
                     }
                     is_break = true;

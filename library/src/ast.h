@@ -7,6 +7,7 @@
 extern "C" {
 #endif
 #define LIBNAMUMARK_AST_H
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -42,7 +43,7 @@ extern "C" {
 #define AST_NODE_TYPE_WIKI 26
 #define AST_NODE_TYPE_COLOR 27
 
-    // AST data types
+// AST data types
 #define AST_DATA_TYPE_NONE 0
 #define AST_DATA_TYPE_STRING 1
 #define AST_DATA_TYPE_INT 2
@@ -53,14 +54,14 @@ extern "C" {
 #define AST_DATA_TYPE_ARGUMENT 7
 #define AST_DATA_TYPE_LINK 8
 #define AST_DATA_TYPE_COLOR 9
-typedef struct ast_data_link{
-    char* link;
+typedef struct ast_data_link {
+    char *link;
     size_t link_size;
 } ast_data_link;
-typedef struct ast_data_color{
-    char* color;
+typedef struct ast_data_color {
+    char *color;
     size_t color_size;
-    char* dark_color;
+    char *dark_color;
     size_t dark_color_size;
 } ast_data_color;
 
@@ -83,9 +84,13 @@ typedef struct ast_node {
 
 // AST node functions
 ast_node *ast_node_new(int type, void *data, size_t data_size, int data_type, size_t index);
+
 void ast_node_add_child(ast_node *parent, ast_node *child);
+
 void ast_node_free(ast_node *node);
+
 void ast_node_remove_child(ast_node *parent, size_t index);
+
 #ifdef DEBUG
 void ast_node_print(ast_node *node);
 #endif
