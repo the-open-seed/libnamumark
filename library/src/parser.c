@@ -100,14 +100,6 @@ struct syntax *get_syntax_by_type(int type) {
     abort();
 }
 
-// we just use this once(might?)
-// get ast_node in stack match type
-// explanation: if we have a stack like this:
-// [AST_NODE_TYPE_H1, AST_NODE_TYPE_H2, AST_NODE_TYPE_H3, AST_NODE_TYPE_H4, AST_NODE_TYPE_H5, AST_NODE_TYPE_H6](type only for example)
-// and we want to get AST_NODE_TYPE_H3, we can use this function
-// if we want to get AST_NODE_TYPE_H1, we can use this function too
-// but if we want to get AST_NODE_TYPE_LINK, we can't use this function
-// so... we need to check if the return value is equal to stack->size
 size_t get_ast_node_in_stack_match_type(stack *stack1, int type) {
     ast_node **data = (ast_node **) stack1->data;
     size_t data_size = stack1->size;
@@ -348,8 +340,8 @@ ast_node *parse(const char *text, const size_t text_size) {
                 is_break = true;
                 break;
             }
-                // !!! WRONG SYNTAX END STRING !!!
-                // find wrong syntax
+            // !!! WRONG SYNTAX END STRING !!!
+            // find wrong syntax
             else if (strlen(current_syntax.end) != 0 && is_syntax_end &&
                      type_exists_in_stack(node_stack, current_syntax.type)) {
                 // resize buf
@@ -660,15 +652,29 @@ ast_node *parse(const char *text, const size_t text_size) {
             previous_node->data_size += str_buf_size;
         } else {
             // create new node
-            ast_node *new_node = ast_node_new(AST_NODE_TYPE_TEXT, str_buf, str_buf_size, AST_DATA_TYPE_STRING,
-                                              text_size);
+            ast_node *new_node = ast_node_new(AST_NODE_TYPE_TEXT, str_buf, str_buf_size, AST_DATA_TYPE_STRING, text_size);
             // add new node to current node
             ast_node_add_child(root, new_node);
         }
     }
     if (node_stack->size > 0) {
         // TODO: handling improper syntax error
-        abort();
+        while(node_stack->size > 0) {
+            ast_node* current = stack_pop(node_stack);
+            // make text node
+
+            // move children to root
+            for (size_t i = 0; i < current->children_size; i++) {
+                ast_node_add_child(root, current->children[i]);
+            }
+            if(node_stack->size > 0) {
+                ast_node_remove_child(node_stack->data[node_stack->size - 1],
+                                      ((ast_node *) node_stack->data[node_stack->size - 1])->children_size - 1);
+            }
+            else {
+                ast_node_remove_child(root, root->children_size - 1);
+            }
+        }
     }
     return root;
 }
