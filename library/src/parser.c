@@ -629,9 +629,9 @@ ast_node *parse(const char *text, const size_t text_size) {
             // copy start syntax to buf
             memcpy(str_buf, current_syntax->start, strlen(current_syntax->start));
             str_buf_size += strlen(current_syntax->start);
+            ast_node* parent = node_stack->data[node_stack->size - 1];
             // remove current node from node_stack
-            ast_node_remove_child(node_stack->data[node_stack->size - 1],
-                                  ((ast_node *) node_stack->data[node_stack->size - 1])->children_size - 1);
+            ast_node_remove_child(parent,parent->children_size - 1);
             // change current node
             current_node = stack_pop(node_stack);
         }
