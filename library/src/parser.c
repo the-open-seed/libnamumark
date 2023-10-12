@@ -40,7 +40,8 @@ struct syntax syntax_defines[] = {
         {"''",         "''",        AST_NODE_TYPE_ITALIC},
         {"__",         "__",        AST_NODE_TYPE_UNDERLINE},
         {"~~",         "~~",        AST_NODE_TYPE_STRIKE},
-        {"> ",         "\n",        AST_NODE_TYPE_BLOCKQUOTE, SYNTAX_FLAG_LINE | SYNTAX_FLAG_MARGE_SAME_TYPE | SYNTAX_FLAG_LINE_ALLOW_MULTIPLE},
+        {"> ",         "\n",        AST_NODE_TYPE_BLOCKQUOTE, SYNTAX_FLAG_LINE | SYNTAX_FLAG_MARGE_SAME_TYPE |
+                                                              SYNTAX_FLAG_LINE_ALLOW_MULTIPLE},
         {"##",         "\n",        AST_NODE_TYPE_COMMENT},
         {"[",          "]",         AST_NODE_TYPE_FUNCTION},
         {" * ",        "",          AST_NODE_TYPE_LIST},
@@ -332,7 +333,7 @@ ast_node *parse(const char *text, const size_t text_size) {
                 // pop current node from node_stack
                 current_node = stack_pop(node_stack);
                 // process end of AST_NODE_TYPE_BLOCKQUOTE in AST_NODE_TYPE_BLOCKQUOTE
-                if(current_syntax.flags & SYNTAX_FLAG_LINE_ALLOW_MULTIPLE){
+                if (current_syntax.flags & SYNTAX_FLAG_LINE_ALLOW_MULTIPLE) {
                     while (current_node->type == current_syntax.type) {
                         current_node = stack_pop(node_stack);
                     }
@@ -342,8 +343,8 @@ ast_node *parse(const char *text, const size_t text_size) {
                 is_break = true;
                 break;
             }
-            // !!! WRONG SYNTAX END STRING !!!
-            // find wrong syntax
+                // !!! WRONG SYNTAX END STRING !!!
+                // find wrong syntax
             else if (strlen(current_syntax.end) != 0 && is_syntax_end &&
                      type_exists_in_stack(node_stack, current_syntax.type)) {
                 // resize buf
@@ -454,9 +455,11 @@ ast_node *parse(const char *text, const size_t text_size) {
                 }
 
                 // process AST_NODE_TYPE_COLOR
-                if (current_syntax.type == AST_NODE_TYPE_COLOR &&
-                    starts_with_color(text + i + strlen(current_syntax.start) - 1,
-                                      text_size - i - strlen(current_syntax.start) + 1)) {
+                if (current_syntax.type == AST_NODE_TYPE_COLOR) {
+                    if (!starts_with_color(text + i + strlen(current_syntax.start) - 1,
+                                           text_size - i - strlen(current_syntax.start) + 1)) {
+                        continue;
+                    }
                     ast_data_color *data = calloc(sizeof(ast_data_color), 1);
                     if (data == NULL) {
                         abort();
@@ -505,9 +508,6 @@ ast_node *parse(const char *text, const size_t text_size) {
                     i += color_size + strlen(current_syntax.start) - 1;
                     is_break = true;
                     break;
-                }
-                if (current_syntax.type == AST_NODE_TYPE_COLOR) {
-                    continue;
                 }
                 if (current_syntax.type == AST_NODE_TYPE_LINK) {
                     // find end of link syntax
@@ -617,7 +617,7 @@ ast_node *parse(const char *text, const size_t text_size) {
         str_buf = tmp;
         str_buf_size++;
         str_buf[str_buf_size] = '\0';
-        if (current_node->type >= AST_NODE_TYPE_H1 && current_node->type <= AST_NODE_TYPE_H6 && text[i] == '\n') {
+        if (get_syntax_by_type(current_node->type)->flags & SYNTAX_FLAG_LINE && text[i] == '\n') {
             // get syntax
             struct syntax *current_syntax = get_syntax_by_type(current_node->type);
             // resize buf
@@ -631,9 +631,9 @@ ast_node *parse(const char *text, const size_t text_size) {
             // copy start syntax to buf
             memcpy(str_buf, current_syntax->start, strlen(current_syntax->start));
             str_buf_size += strlen(current_syntax->start);
-            ast_node* parent = node_stack->data[node_stack->size - 1];
+            ast_node *parent = node_stack->data[node_stack->size - 1];
             // remove current node from node_stack
-            ast_node_remove_child(parent,parent->children_size - 1);
+            ast_node_remove_child(parent, parent->children_size - 1);
             // change current node
             current_node = stack_pop(node_stack);
         }
@@ -654,26 +654,26 @@ ast_node *parse(const char *text, const size_t text_size) {
             previous_node->data_size += str_buf_size;
         } else {
             // create new node
-            ast_node *new_node = ast_node_new(AST_NODE_TYPE_TEXT, str_buf, str_buf_size, AST_DATA_TYPE_STRING, text_size);
+            ast_node *new_node = ast_node_new(AST_NODE_TYPE_TEXT, str_buf, str_buf_size, AST_DATA_TYPE_STRING,
+                                              text_size);
             // add new node to current node
             ast_node_add_child(root, new_node);
         }
     }
     if (node_stack->size > 0) {
         // TODO: handling improper syntax error
-        while(node_stack->size > 0) {
-            ast_node* current = stack_pop(node_stack);
+        while (node_stack->size > 0) {
+            ast_node *current = stack_pop(node_stack);
             // make text node
 
             // move children to root
             for (size_t i = 0; i < current->children_size; i++) {
                 ast_node_add_child(root, current->children[i]);
             }
-            if(node_stack->size > 0) {
+            if (node_stack->size > 0) {
                 ast_node_remove_child(node_stack->data[node_stack->size - 1],
                                       ((ast_node *) node_stack->data[node_stack->size - 1])->children_size - 1);
-            }
-            else {
+            } else {
                 ast_node_remove_child(root, root->children_size - 1);
             }
         }
