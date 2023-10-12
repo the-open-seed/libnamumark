@@ -58,6 +58,8 @@ struct syntax syntax_defines[] = {
         {",,",         ",,",        AST_NODE_TYPE_LOWER_TEXT},
 };
 
+struct syntax NULL_SYNTAX = {"", "", INT_MAX, 0};
+
 const size_t named_colors_size = 147;
 // Warning: MUST Check String Length(MAX: 29) before adding new color
 const char named_colors[][30] = {"aliceblue", "antiquewhite", "aqua", "aquamarine", "azure", "beige", "bisque", "black",
@@ -100,7 +102,7 @@ struct syntax *get_syntax_by_type(int type) {
             return &syntax_defines[i];
         }
     }
-    abort();
+    return &NULL_SYNTAX;
 }
 
 size_t get_ast_node_in_stack_match_type(stack *stack1, int type) {
@@ -384,7 +386,7 @@ ast_node *parse(const char *text, const size_t text_size) {
             // !!! SYNTAX START STRING !!!
             bool is_syntax_start = starts_with(text + i, text_size - i, current_syntax.start);
             // process AST_NODE_TYPE_BLOCKQUOTE in AST_NODE_TYPE_BLOCKQUOTE
-            if (current_node->type == AST_NODE_TYPE_BLOCKQUOTE && current_syntax.type == current_node->type &&
+            if (get_syntax_by_type(current_node->type)->flags & SYNTAX_FLAG_LINE_ALLOW_MULTIPLE && current_syntax.type == current_node->type &&
                 str_buf_size == 0 && is_syntax_start) {
                 // create new node
                 ast_node *new_node = ast_node_new(current_syntax.type, NULL, 0, AST_DATA_TYPE_NONE, i);

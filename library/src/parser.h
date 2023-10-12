@@ -13,6 +13,7 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <limits.h>
 
 ast_node *parse(const char *text, const size_t text_size);
 
