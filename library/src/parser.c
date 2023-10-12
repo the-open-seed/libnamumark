@@ -18,6 +18,8 @@ struct syntax {
 
 #define SYNTAX_FLAG_LINE (0x01 << 0)
 #define SYNTAX_FLAG_COLLAPSE (0x01 << 1)
+#define SYNTAX_FLAG_MARGE_SAME_TYPE (0x01 << 2)
+#define SYNTAX_FLAG_LINE_ALLOW_MULTIPLE (0x01 << 3)
 // define syntax_defines
 struct syntax syntax_defines[] = {
         {"[* ",        "]",         AST_NODE_TYPE_FOOTNOTE},
@@ -38,7 +40,7 @@ struct syntax syntax_defines[] = {
         {"''",         "''",        AST_NODE_TYPE_ITALIC},
         {"__",         "__",        AST_NODE_TYPE_UNDERLINE},
         {"~~",         "~~",        AST_NODE_TYPE_STRIKE},
-        {"> ",         "\n",        AST_NODE_TYPE_BLOCKQUOTE, SYNTAX_FLAG_LINE},
+        {"> ",         "\n",        AST_NODE_TYPE_BLOCKQUOTE, SYNTAX_FLAG_LINE | SYNTAX_FLAG_MARGE_SAME_TYPE | SYNTAX_FLAG_LINE_ALLOW_MULTIPLE},
         {"##",         "\n",        AST_NODE_TYPE_COMMENT},
         {"[",          "]",         AST_NODE_TYPE_FUNCTION},
         {" * ",        "",          AST_NODE_TYPE_LIST},
@@ -330,8 +332,8 @@ ast_node *parse(const char *text, const size_t text_size) {
                 // pop current node from node_stack
                 current_node = stack_pop(node_stack);
                 // process end of AST_NODE_TYPE_BLOCKQUOTE in AST_NODE_TYPE_BLOCKQUOTE
-                if (current_syntax.type == AST_NODE_TYPE_BLOCKQUOTE) {
-                    while (current_node->type == AST_NODE_TYPE_BLOCKQUOTE) {
+                if(current_syntax.flags & SYNTAX_FLAG_LINE_ALLOW_MULTIPLE){
+                    while (current_node->type == current_syntax.type) {
                         current_node = stack_pop(node_stack);
                     }
                 }
@@ -398,11 +400,11 @@ ast_node *parse(const char *text, const size_t text_size) {
             }
             // find syntax start
             if (is_syntax_start && (!(current_syntax.flags & SYNTAX_FLAG_LINE) || i == 0 || text[i - 1] == '\n')) {
-                // check previous node type is quote
-                if (str_buf_size == 0 && current_node->children_size > 0 &&
-                    current_node->children[current_node->children_size - 1]->type == AST_NODE_TYPE_BLOCKQUOTE) {
+                // check previous node flag is SYNTAX_FLAG_MARGE_SAME_TYPE
+                if (current_node->children_size > 0 && current_syntax.flags & SYNTAX_FLAG_MARGE_SAME_TYPE &&
+                    current_node->children[current_node->children_size - 1]->type == current_syntax.type) {
                     stack_push(node_stack, current_node);
-                    // combine quote
+                    // combine
                     current_node = current_node->children[current_node->children_size - 1];
                     // add \n to str_buf
                     str_buf[str_buf_size] = '\n';
