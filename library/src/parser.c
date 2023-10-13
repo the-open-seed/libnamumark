@@ -275,6 +275,29 @@ char* append_buffer(char* buf, size_t *buf_size, char c) {
     return buf;
 }
 
+void append_text_node(ast_node *text_node, char *text, size_t text_size) {
+    char *buf = realloc(text_node->data, sizeof(char) * (text_node->data_size + text_size) + 1);
+    if (buf == NULL) {
+        abort();
+    }
+    memcpy(buf + text_node->data_size, text, text_size);
+    buf[text_node->data_size + text_size] = '\0';
+    text_node->data = buf;
+    text_node->data_size += text_size;
+}
+
+char* reset_buffer(char* buf, size_t *buf_size, bool free_buf) {
+    if (free_buf) {
+        free(buf);
+    }
+    buf = calloc(sizeof(char), 1);
+    if (buf == NULL) {
+        abort();
+    }
+    *buf_size = 0;
+    return buf;
+}
+
 // Just perform the parsing process
 // parser
 ast_node *parse(const char *text, const size_t text_size) {
@@ -291,14 +314,7 @@ ast_node *parse(const char *text, const size_t text_size) {
         // parse syntax
         bool is_break = false;
         if (text[i] == '\\' && text_size > i + 1) {
-            str_buf[str_buf_size] = text[i + 1];
-            char *tmp = realloc(str_buf, sizeof(char *) * (str_buf_size + 2));
-            if (tmp == NULL) {
-                abort();
-            }
-            str_buf = tmp;
-            str_buf_size++;
-            str_buf[str_buf_size] = '\0';
+            str_buf = append_buffer(str_buf, &str_buf_size, text[i + 1]);
             i++;
             continue;
         }
@@ -315,33 +331,13 @@ ast_node *parse(const char *text, const size_t text_size) {
                     // check previous node type is text
                     if (current_node->children_size > 0 &&
                         current_node->children[current_node->children_size - 1]->type == AST_NODE_TYPE_TEXT) {
-                        // append str_buf to previous node
-                        ast_node *previous_node = current_node->children[current_node->children_size - 1];
-                        char *buf = realloc(previous_node->data,
-                                            sizeof(char) * (previous_node->data_size + str_buf_size) + 1);
-                        if (buf == NULL) {
-                            abort();
-                        }
-                        previous_node->data = buf;
-                        // copy str_buf to buf
-                        memcpy(previous_node->data + previous_node->data_size, str_buf, str_buf_size);
-                        previous_node->data_size += str_buf_size;
-                        // reset str_buf(realloc)
-                        str_buf = realloc(str_buf, sizeof(char)); // NOLINT(*-suspicious-realloc-usage)
-                        if (str_buf == NULL) {
-                            abort();
-                        }
-                        str_buf_size = 0;
-                        str_buf[0] = '\0';
+                        append_text_node(current_node->children[current_node->children_size - 1], str_buf, str_buf_size);
+                        str_buf = reset_buffer(str_buf, &str_buf_size, true);
                     } else {
-                        // create new node
                         ast_node *new_node = ast_node_new(AST_NODE_TYPE_TEXT, str_buf, str_buf_size,
                                                           AST_DATA_TYPE_STRING, i);
-                        // add new node to current node
                         ast_node_add_child(current_node, new_node);
-                        // reset str_buf
-                        str_buf = calloc(sizeof(char), 1);
-                        str_buf_size = 0;
+                        str_buf = reset_buffer(str_buf, &str_buf_size, false);
                     }
                 }
                 // pop current node from node_stack
@@ -361,31 +357,13 @@ ast_node *parse(const char *text, const size_t text_size) {
                 // find wrong syntax
             else if (strlen(current_syntax.end) != 0 && is_syntax_end &&
                      type_exists_in_stack(node_stack, current_syntax.type)) {
-                // resize buf
-                char *buf = realloc(str_buf, sizeof(char) * (str_buf_size + strlen(current_syntax.end)) + 1);
-                if (buf == NULL) {
-                    abort();
-                }
-                str_buf = buf;
-                struct syntax *wrong_syntax = &syntax_defines[
-                        get_ast_node_in_stack_match_type(node_stack,
-                                                         ((ast_node *) node_stack->data[node_stack->size - 1])->type)
-                ];
-                str_buf_size = 0;
+                str_buf = reset_buffer(str_buf, &str_buf_size, true);
                 for (const char *p = text + current_node->index; p < text + i; p++) {
                     if (*p == '\\') {
                         p++;
                     }
-                    str_buf[str_buf_size] = *p;
-                    str_buf_size++;
+                    str_buf = append_buffer(str_buf, &str_buf_size, *p);
                 }
-                // realloc str_buf
-                str_buf[str_buf_size] = '\0';
-                char *tmp = realloc(str_buf, sizeof(char *) * (str_buf_size + 1));
-                if (tmp == NULL) {
-                    abort();
-                }
-                str_buf = tmp;
                 // remove current node from node_stack
                 ast_node_remove_child(node_stack->data[node_stack->size - 1],
                                       ((ast_node *) node_stack->data[node_stack->size - 1])->children_size - 1);
@@ -435,29 +413,14 @@ ast_node *parse(const char *text, const size_t text_size) {
                         current_node->children[current_node->children_size - 1]->type == AST_NODE_TYPE_TEXT) {
                         // append str_buf to previous node
                         ast_node *previous_node = current_node->children[current_node->children_size - 1];
-                        char *buf = realloc(previous_node->data,
-                                            sizeof(char) * (previous_node->data_size + str_buf_size) + 1);
-                        if (buf == NULL) {
-                            abort();
-                        }
-                        previous_node->data = buf;
-                        // copy str_buf to buf
-                        memcpy(previous_node->data + previous_node->data_size, str_buf, str_buf_size);
-                        previous_node->data_size += str_buf_size;
-                        str_buf = realloc(str_buf, sizeof(char)); // NOLINT(*-suspicious-realloc-usage)
-                        if (str_buf == NULL) {
-                            abort();
-                        }
-                        str_buf_size = 0;
+                        append_text_node(previous_node, str_buf, str_buf_size);
+                        str_buf = reset_buffer(str_buf, &str_buf_size, true);
                     } else {
                         // create new node
                         ast_node *new_node = ast_node_new(AST_NODE_TYPE_TEXT, str_buf, str_buf_size,
                                                           AST_DATA_TYPE_STRING, i);
-                        // add new node to current node
                         ast_node_add_child(current_node, new_node);
-                        // reset str_buf
-                        str_buf = calloc(sizeof(char), 1);
-                        str_buf_size = 0;
+                        str_buf = reset_buffer(str_buf, &str_buf_size, false);
                     }
                 }
 

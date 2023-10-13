@@ -32,6 +32,7 @@ void ast_node_add_child(ast_node *parent, ast_node *child) {
     parent->children_size++;
 }
 
+// WARNING: This function will free all children
 void ast_node_free(ast_node *node) {
     // free children(use stack to prevent stack overflow)
     stack *stack = stack_new();
@@ -43,6 +44,8 @@ void ast_node_free(ast_node *node) {
         for (size_t i = 0; i < child->children_size; i++) {
             stack_push(stack, child->children[i]);
         }
+        free(child->children);
+        free(child->data);
         free(child);
     }
     // free data
