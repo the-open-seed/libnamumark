@@ -7,4 +7,5 @@ add_library(namumark SHARED
         src/stack.c
         src/stack.h
         src/parser.c
-        src/parser.h)
+        src/parser.h
+        src/parser_utils.c)
