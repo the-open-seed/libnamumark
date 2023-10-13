@@ -292,6 +292,7 @@ ast_node *parse(const char *text, const size_t text_size) {
             continue;
         }
         const size_t syntax_defines_size = sizeof(syntax_defines) / sizeof(struct syntax);
+        const struct syntax *current_node_syntax = get_syntax_by_type(current_node->type);
         for (size_t j = 0; j < syntax_defines_size; j++) {
             struct syntax current_syntax = syntax_defines[j];
             // !!! SYNTAX END STRING !!!
@@ -386,7 +387,7 @@ ast_node *parse(const char *text, const size_t text_size) {
             // !!! SYNTAX START STRING !!!
             bool is_syntax_start = starts_with(text + i, text_size - i, current_syntax.start);
             // process AST_NODE_TYPE_BLOCKQUOTE in AST_NODE_TYPE_BLOCKQUOTE
-            if (get_syntax_by_type(current_node->type)->flags & SYNTAX_FLAG_LINE_ALLOW_MULTIPLE && current_syntax.type == current_node->type &&
+            if (current_node_syntax->flags & SYNTAX_FLAG_LINE_ALLOW_MULTIPLE && current_syntax.type == current_node->type &&
                 str_buf_size == 0 && is_syntax_start) {
                 // create new node
                 ast_node *new_node = ast_node_new(current_syntax.type, NULL, 0, AST_DATA_TYPE_NONE, i);
@@ -610,6 +611,7 @@ ast_node *parse(const char *text, const size_t text_size) {
         if (is_break) {
             continue;
         }
+        // append text[i] to str_buf
         // realloc str_buf
         str_buf[str_buf_size] = text[i];
         char *tmp = realloc(str_buf, sizeof(char *) * (str_buf_size + 2));
@@ -619,20 +621,20 @@ ast_node *parse(const char *text, const size_t text_size) {
         str_buf = tmp;
         str_buf_size++;
         str_buf[str_buf_size] = '\0';
-        if (get_syntax_by_type(current_node->type)->flags & SYNTAX_FLAG_LINE && text[i] == '\n') {
-            // get syntax
-            struct syntax *current_syntax = get_syntax_by_type(current_node->type);
+
+        // if current node is LINE syntax, and text[i] is '\n', this is not correct syntax
+        if (current_node_syntax->flags & SYNTAX_FLAG_LINE && text[i] == '\n') {
             // resize buf
-            char *buf = realloc(str_buf, sizeof(char) * (str_buf_size + strlen(current_syntax->start)) + 1);
+            char *buf = realloc(str_buf, sizeof(char) * (str_buf_size + strlen(current_node_syntax->start)) + 1);
             if (buf == NULL) {
                 abort();
             }
             str_buf = buf;
             // move buf content(must use memmove, because str_buf and str_buf+strlen(current_syntax->start) overlaps)
-            memmove(str_buf + strlen(current_syntax->start), str_buf, str_buf_size);
+            memmove(str_buf + strlen(current_node_syntax->start), str_buf, str_buf_size);
             // copy start syntax to buf
-            memcpy(str_buf, current_syntax->start, strlen(current_syntax->start));
-            str_buf_size += strlen(current_syntax->start);
+            memcpy(str_buf, current_node_syntax->start, strlen(current_node_syntax->start));
+            str_buf_size += strlen(current_node_syntax->start);
             ast_node *parent = node_stack->data[node_stack->size - 1];
             // remove current node from node_stack
             ast_node_remove_child(parent, parent->children_size - 1);
@@ -640,6 +642,7 @@ ast_node *parse(const char *text, const size_t text_size) {
             current_node = stack_pop(node_stack);
         }
     }
+    // when loop ends, check str_buf
     if (str_buf_size > 0) {
         // check previous node type is text
         if (current_node->children_size > 0 &&
@@ -654,6 +657,7 @@ ast_node *parse(const char *text, const size_t text_size) {
             // copy str_buf to buf
             memcpy(previous_node->data + previous_node->data_size, str_buf, str_buf_size);
             previous_node->data_size += str_buf_size;
+            free(str_buf);
         } else {
             // create new node
             ast_node *new_node = ast_node_new(AST_NODE_TYPE_TEXT, str_buf, str_buf_size, AST_DATA_TYPE_STRING,
