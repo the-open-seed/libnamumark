@@ -58,8 +58,6 @@ struct syntax syntax_defines[] = {
         {",,",         ",,",        AST_NODE_TYPE_LOWER_TEXT},
 };
 
-struct syntax NULL_SYNTAX = {"", "", INT_MAX, 0};
-
 const size_t named_colors_size = 147;
 // Warning: MUST Check String Length(MAX: 29) before adding new color
 const char named_colors[][30] = {"aliceblue", "antiquewhite", "aqua", "aquamarine", "azure", "beige", "bisque", "black",
@@ -94,6 +92,8 @@ const char named_colors[][30] = {"aliceblue", "antiquewhite", "aqua", "aquamarin
                                  "slategray", "slategrey", "snow", "springgreen", "steelblue", "tan", "teal", "thistle",
                                  "tomato", "turquoise", "violet", "wheat", "white", "whitesmoke", "yellow",
                                  "yellowgreen"};
+
+struct syntax NULL_SYNTAX = {"", "", INT_MAX, 0};
 
 // get syntax by type
 struct syntax *get_syntax_by_type(int type) {
@@ -244,8 +244,7 @@ bool starts_with_color(const char *text, const size_t text_size) {
             break;
         }
         // check is alphabet, or number or '#'
-        if (!(text[i] >= 'a' && text[i] <= 'z') && !(text[i] >= 'A' && text[i] <= 'Z') &&
-            !(text[i] >= '0' && text[i] <= '9') && text[i] != '#') {
+        if (!is_hex(text[i]) && text[i] != '#') {
             break;
         }
     }
@@ -262,6 +261,18 @@ bool starts_with_color(const char *text, const size_t text_size) {
     }
     free(text1);
     return false;
+}
+
+char* append_buffer(char* buf, size_t *buf_size, char c) {
+    char* tmp = realloc(buf, sizeof(char) * (*buf_size + 2));
+    if (tmp == NULL) {
+        abort();
+    }
+    buf = tmp;
+    buf[*buf_size] = c;
+    buf[*buf_size + 1] = '\0';
+    *buf_size += 1;
+    return buf;
 }
 
 // Just perform the parsing process
@@ -411,14 +422,7 @@ ast_node *parse(const char *text, const size_t text_size) {
                     // combine
                     current_node = current_node->children[current_node->children_size - 1];
                     // add \n to str_buf
-                    str_buf[str_buf_size] = '\n';
-                    char *tmp = realloc(str_buf, sizeof(char *) * (str_buf_size + 2));
-                    if (tmp == NULL) {
-                        abort();
-                    }
-                    str_buf = tmp;
-                    str_buf_size++;
-                    str_buf[str_buf_size] = '\0';
+                    str_buf = append_buffer(str_buf, &str_buf_size, '\n');
                     // skip syntax
                     i += strlen(current_syntax.start) - 1;
                     is_break = true;
@@ -520,17 +524,9 @@ ast_node *parse(const char *text, const size_t text_size) {
                     char *link_buf = calloc(sizeof(char), 1);
                     // get link. we get all things needed to create link node at once
                     for (size_t k = i + strlen(current_syntax.start); k < text_size - 1; k++) {
-                        link_size++;
                         if (text[k] == '\\') {
+                            link_buf = append_buffer(link_buf, &link_size, text[k + 1]);
                             k++;
-                            // realloc link_buf
-                            char *tmp = realloc(link_buf, sizeof(char *) * (link_size + 2));
-                            if (tmp == NULL) {
-                                abort();
-                            }
-                            link_buf = tmp;
-                            link_buf[link_size - 1] = text[k + 1];
-                            link_buf[link_size] = '\0';
                             continue;
                         }
                         if (text[k] == '\n') {
@@ -544,15 +540,9 @@ ast_node *parse(const char *text, const size_t text_size) {
                             is_link_syntax = true;
                             break;
                         }
-                        // realloc link_buf
-                        char *tmp = realloc(link_buf, sizeof(char *) * (link_size + 2));
-                        if (tmp == NULL) {
-                            abort();
-                        }
-                        link_buf = tmp;
-                        link_buf[link_size - 1] = text[k];
-                        link_buf[link_size] = '\0';
+                        link_buf = append_buffer(link_buf, &link_size, text[k]);
                     }
+                    link_size++;
                     if (!is_link_syntax) {
                         free(link_buf);
                         continue;
@@ -613,14 +603,7 @@ ast_node *parse(const char *text, const size_t text_size) {
         }
         // append text[i] to str_buf
         // realloc str_buf
-        str_buf[str_buf_size] = text[i];
-        char *tmp = realloc(str_buf, sizeof(char *) * (str_buf_size + 2));
-        if (tmp == NULL) {
-            abort();
-        }
-        str_buf = tmp;
-        str_buf_size++;
-        str_buf[str_buf_size] = '\0';
+        str_buf = append_buffer(str_buf, &str_buf_size, text[i]);
 
         // if current node is LINE syntax, and text[i] is '\n', this is not correct syntax
         if (current_node_syntax->flags & SYNTAX_FLAG_LINE && text[i] == '\n') {
