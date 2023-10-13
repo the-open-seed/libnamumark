@@ -367,7 +367,6 @@ ast_node *parse(const char *text, const size_t text_size) {
                 // remove current node from node_stack
                 ast_node_remove_child(node_stack->data[node_stack->size - 1],
                                       ((ast_node *) node_stack->data[node_stack->size - 1])->children_size - 1);
-                // change current node
                 current_node = stack_pop(node_stack);
                 i += strlen(current_syntax.end) - 1;
                 is_break = true;
@@ -380,13 +379,9 @@ ast_node *parse(const char *text, const size_t text_size) {
                 str_buf_size == 0 && is_syntax_start) {
                 // create new node
                 ast_node *new_node = ast_node_new(current_syntax.type, NULL, 0, AST_DATA_TYPE_NONE, i);
-                // add new node to current node
                 ast_node_add_child(current_node, new_node);
-                // push current node to node_stack
                 stack_push(node_stack, current_node);
-                // set new node as current node
                 current_node = new_node;
-                // skip syntax
                 i += strlen(current_syntax.start) - 1;
                 is_break = true;
                 break;
@@ -466,15 +461,10 @@ ast_node *parse(const char *text, const size_t text_size) {
                     }
                     memcpy(data->color, color, dark_color_pos == 0 ? color_size : dark_color_pos - 1);
                     data->color_size = dark_color_pos == 0 ? color_size : dark_color_pos - 1;
-                    // create new node
                     ast_node *new_node = ast_node_new(current_syntax.type, data, 0, AST_DATA_TYPE_COLOR, i);
-                    // add new node to current node
                     ast_node_add_child(current_node, new_node);
-                    // push current node to node_stack
                     stack_push(node_stack, current_node);
-                    // set new node as current node
                     current_node = new_node;
-                    // skip syntax
                     i += color_size + strlen(current_syntax.start) - 1;
                     is_break = true;
                     break;
